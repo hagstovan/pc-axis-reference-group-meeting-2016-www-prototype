@@ -17,7 +17,6 @@
 
 	<script defer src="lib/json-stat/json-stat.js"></script>
 	<script defer src="lib/json-stat/utils/json-stat.utils.js"></script>
-	<script defer src="http://ajax.googleapis.com/ajax/libs/jquery/1.0.8/jquery.min.js"></script>
 	<script defer src="lib/highstock-5.0.0/js/highstock.js"></script>
 	<script defer src="lib/highstock-5.0.0/js/modules/exporting.js"></script>
 
@@ -1041,7 +1040,20 @@
 
               document.getElementById("var1").innerHTML = data;
 
-            //Build Series
+            
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+
+            //Build Chart
+
+            $.getJSON('syslur7.geo.json', function (geojson) {
+
+            	//Build Series
             var createdSeries = [{
                           data: data,
                           mapData: geojson,
@@ -1058,17 +1070,6 @@
                               format: '{point.properties.postal}'
                           }
                       }];
-
-            //Build Title
-            var title = ds.label;
-
-            //Build subtitle
-            var subtitle = ds.source;
-
-
-            //Build Chart
-
-            $.getJSON('syslur7.geo.json', function (geojson) {
 
                 $('#chart6').highcharts('Map', {
 
