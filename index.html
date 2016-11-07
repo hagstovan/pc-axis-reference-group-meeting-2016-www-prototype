@@ -15,16 +15,11 @@
 	<link rel="stylesheet" href="css/animate.css" type="text/css" />
 	<link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
 
-	<script defer src="lib/json-stat/json-stat.js"></script>
-	<script defer src="lib/json-stat/utils/json-stat.utils.js"></script>
-	<script defer src="lib/highstock-5.0.0/js/highstock.js"></script>
-	<script defer src="lib/highstock-5.0.0/js/modules/exporting.js"></script>
+	
 
 
 
-    <script defer src="https://code.highcharts.com/maps/highmaps.js"></script>    	
-    <script defer src="https://code.highcharts.com/maps/modules/data.js"></script>
-    <script defer src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+    
 
 
 	<link rel="stylesheet" href="css/responsive.css" type="text/css" />
@@ -1007,28 +1002,21 @@
 
         //Chart 6 specific functions
         function buildChart6(jsonStatData) {
+            ds=JSONstat(jsonStatData).Dataset(0);
+            t=ds.Dimension("year").length-1;
 
-            //Extrat Data From JSON Stat
-            ds = JSONstat(jsonStatData).Dataset(0);
-            t = ds.Dimension("year").length - 1;
-            year = ds.Dimension("year").id[t];
+            var latestyear = ds.Dimension("year").Category(t).label;
 
-            //Format Data
+          var Nordstreymoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"NS", "sex":"TOT", "unit":"PCT"}, false);
+          var Sudurstreymoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"SS", "sex":"TOT", "unit":"PCT"}, false);
+          var Suduroyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"SU", "sex":"TOT", "unit":"PCT"}, false);
+          var Sandoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"SA", "sex":"TOT", "unit":"PCT"}, false);
+          var Vaga = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"VA", "sex":"TOT", "unit":"PCT"}, false);
+          var Eysturoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"EY", "sex":"TOT", "unit":"PCT"}, false);
+          var Nordoya = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"NO", "sex":"TOT", "unit":"PCT"}, false);
 
 
-              var latestyear = ds.Dimension("year").Category(t).label;
-
-
-
-              var Nordstreymoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"NS", "sex":"TOT", "unit":"PCT"}, false);
-              var Sudurstreymoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"SS", "sex":"TOT", "unit":"PCT"}, false);
-              var Suduroyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"SU", "sex":"TOT", "unit":"PCT"}, false);
-              var Sandoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"SA", "sex":"TOT", "unit":"PCT"}, false);
-              var Vaga = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"VA", "sex":"TOT", "unit":"PCT"}, false);
-              var Eysturoyar = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"EY", "sex":"TOT", "unit":"PCT"}, false);
-              var Nordoya = ds.Data({"measure": "AF", "year":latestyear, "district of residence":"NO", "sex":"TOT", "unit":"PCT"}, false);
-                   
-              var data = [
+          var data = [
                   ['Nordstreymoyar', Nordstreymoyar],
                   ['Sudurstreymoyar', Sudurstreymoyar],
                   ['Suduroyar', Suduroyar],
@@ -1038,23 +1026,45 @@
                   ['Nordoya', Nordoya] 
               ];
 
-              document.getElementById("var1").innerHTML = data;
-
-            
-
-            //Build Title
-            var title = ds.label;
-
-            //Build subtitle
-            var subtitle = ds.source;
 
 
-            //Build Chart
+              $.getJSON('syslur7.geo.json', function (geojson) {
 
-            $.getJSON('syslur7.geo.json', function (geojson) {
+                  // Initiate the chart
+                  $('#chart6').highcharts('Map', {
+                    title: {
+                          text: 'Arbeiðsfjøldin í Føroyum'
+                      },
+                      credits: {
+                        enabled: false
+                      },                    
+                      mapNavigation: {
+                          enabled: true,
+                          buttonOptions: {
+                              verticalAlign: 'bottom'
+                          }
+                      },
+                      legend: {
+                          title: {
+                              text: "Arbeiðsfjøldin (%) í mun til fólkatalið"
+                          }
+                        },
+                      colorAxis: {
+                      min: 75,
+                      max: 90,
+                      stops: [
+                          [0, '#3060cf'],
+                          [0.5, '#fffbbc'],
+                          [0.9, '#c4463a'],
+                          [1, '#c4463a']],
 
-            	//Build Series
-            var createdSeries = [{
+                      },
+                      tooltip: {
+                              valueDecimals: 0,
+                              valueSuffix: '%',
+
+                      },          
+                      series: [{
                           data: data,
                           mapData: geojson,
                           joinBy: ['name', 0],
@@ -1069,45 +1079,11 @@
                               enabled: true,
                               format: '{point.properties.postal}'
                           }
-                      }];
+                      }]
+                     
+                  });
+              });
 
-                $('#chart6').highcharts('Map', {
-
-                  title: {
-                      text: 'Arbeiðsfjøldin í Føroyum'
-                  },
-                  credits: {
-                    enabled: false
-                  },                    
-                  mapNavigation: {
-                      enabled: true,
-                      buttonOptions: {
-                          verticalAlign: 'bottom'
-                      }
-                  },
-                  legend: {
-                      title: {
-                          text: "Arbeiðsfjøldin (%) í mun til fólkatalið"
-                      }
-                    },
-                  colorAxis: {
-                  min: 75,
-                  max: 90,
-                  stops: [
-                      [0, '#3060cf'],
-                      [0.5, '#fffbbc'],
-                      [0.9, '#c4463a'],
-                      [1, '#c4463a']],
-
-                  },
-                  tooltip: {
-                          valueDecimals: 0,
-                          valueSuffix: '%',
-
-                  },
-                  series: createdSeries
-                });
-            });
         }
 
         function loadDataAndBuildChart6() {
@@ -1511,14 +1487,7 @@
             ;
         }
 		
-        //START LOADING AND BUILDING CHART 1
-        loadDataAndBuildChart1();
-		loadDataAndBuildChart2();
-        loadDataAndBuildChart3();   
-        loadDataAndBuildChart4();   
-        loadDataAndBuildChart5();                    
-        loadDataAndBuildChart6();   
-        loadDataAndBuildChart7();  
+        
 
     </script>
 
@@ -2211,6 +2180,31 @@
 	<!-- Footer Scripts
 	============================================= -->
 	<script type="text/javascript" src="js/functions.js"></script>
+
+    <script src="lib/json-stat/json-stat.js"></script>
+    <script src="lib/json-stat/utils/json-stat.utils.js"></script>
+    <script src="lib/highstock-5.0.0/js/highstock.js"></script>
+    <script src="lib/highstock-5.0.0/js/modules/exporting.js"></script>
+
+    <!--<script src="https://code.highcharts.com/maps/highmaps.js"></script>  -->
+    <script src="https://code.highcharts.com/maps/modules/map.js"></script>   
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+
+    
+
+<script>
+$(document).ready(function() {
+    //START LOADING AND BUILDING CHART 1
+    loadDataAndBuildChart1();
+    loadDataAndBuildChart2();
+    loadDataAndBuildChart3();   
+    loadDataAndBuildChart4();   
+    loadDataAndBuildChart5();                    
+    loadDataAndBuildChart6();
+    loadDataAndBuildChart7();  
+});
+</script>
 
 </body>
 </html>
