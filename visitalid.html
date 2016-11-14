@@ -90,7 +90,7 @@ $('html').mouseover(function() {
             year = ds.Dimension("month").id[t];
 
             //Format Data
-            var visital = ds.Data({ "indicator": "0" }, false);
+            var visital = ds.Data({ "indicator": "0" }, false).filter(n => n);
 
             var year = ds.Dimension("month", false);
             var fLen = year.length;
@@ -130,7 +130,7 @@ $('html').mouseover(function() {
 
             //Build Tooltip
             var tooltipFunction = function() {
-                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
+                var s = '<b>' + Highcharts.dateFormat('%Y-%b', this.x) + '</b>';
                 var sum = 0;
                 $.each(this.points,
                     function(i, point) {
