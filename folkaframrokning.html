@@ -94,9 +94,12 @@ $('html').mouseover(function() {
             var u95 = ds.Data({ "predictioninterval": "U95" }, false);
             var l95 = ds.Data({ "predictioninterval": "L95" }, false);
 
-alert(prediction)
-alert(u95)
-alert(l95)
+            var u90 = ds.Data({ "predictioninterval": "U90" }, false);
+            var l90 = ds.Data({ "predictioninterval": "L90" }, false);
+
+            var u80 = ds.Data({ "predictioninterval": "U80" }, false);
+            var l80 = ds.Data({ "predictioninterval": "L80" }, false);
+
 
             var year = ds.Dimension("year", false);
             var fLen = year.length;
@@ -110,17 +113,22 @@ alert(l95)
             }
 
 
-            var u95data = [];
+            var f95data = [];
             for (var i = 0; i < fLen; i++) {
-                u95data.push([Date.parse(year[i]), u95[i]]);
+                f95data.push([Date.parse(year[i]), u95[i], l95[i]]);
             }            
 
 
-            var l95data = [];
+            var f90data = [];
             for (var i = 0; i < fLen; i++) {
-                l95data.push([Date.parse(year[i]), l95[i]]);
+                f90data.push([Date.parse(year[i]), u90[i], l90[i]]);
             }   
 
+
+            var f80data = [];
+            for (var i = 0; i < fLen; i++) {
+                f80data.push([Date.parse(year[i]), u80[i], l80[i]]);
+            }   
 
 
 
@@ -128,25 +136,37 @@ alert(l95)
             var createdSeries = [{
                     name: 'Fólkagongd (Median)',
                     data: predictiondata,
-                    color: '#2980b9',
+                    type: 'line',
+                    color: '#ecf0f1',
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    zIndex: 2
+                }, {
+                    name: '95% vissa',
+                    data: f95data,
+                    type: 'arearange',
+                    color: '#f1c40f',
                     tooltip: {
                         valueDecimals: 0
                     }
                 }, {
-                    name: 'Hægra 95%',
-                    data: u95data,
-                    color: '#2980b9',
+                    name: '90% vissa',
+                    data: f90data,
+                    type: 'arearange',
+                    color: '#f39c12',
                     tooltip: {
                         valueDecimals: 0
                     }
                 }, {
-                    name: 'Lægra 95%',
-                    data: l95data,
-                    color: '#2980b9',
+                    name: '80% vissa',
+                    data: f80data,
+                    type: 'arearange',
+                    color: '#c0392b',
                     tooltip: {
                         valueDecimals: 0
                     }
-                }                
+                }                    
             ];
 
 
@@ -158,17 +178,6 @@ alert(l95)
             //Build subtitle
             var subtitle = ds.source;
 
-            //Build Tooltip
-            var tooltipFunction = function() {
-                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
-                var sum = 0;
-                $.each(this.points,
-                    function(i, point) {
-                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0);
-                    });
-                return s;
-            }
-
             //Build Chart
             $('#chart1').highcharts({
                 credits: {
@@ -176,6 +185,7 @@ alert(l95)
 			            href: 'http://www.hagstova.fo'
                 },
                 chart: {
+                    type: 'arearange',
 		            borderColor: '#bdc3c7',
 		            borderWidth: 1,
 			        marginTop: 80,
@@ -207,23 +217,15 @@ alert(l95)
                     }                  
                 },
                 tooltip: {
-                    formatter: tooltipFunction,
-                    shared: true
-                },
-                plotOptions: {
-                    area: {
-                        stacking: 'normal',
-                        lineColor: '#666666',
-                        lineWidth: 1,
-                        marker: {
-                            lineWidth: 1,
-                            lineColor: '#666666'
-                        }
-                    },
-	                series: {
-	                    showInNavigator: true
-	                }                    
-                },
+                crosshairs: true,
+                shared: true,
+                valueSuffix: 'fólk'
+            },
+
+            legend: {
+            },
+
+
                 series: createdSeries
             });
         }
@@ -247,7 +249,11 @@ alert(l95)
                         "values": [
                           "U95",
                           "MED",
-                          "L95"
+                          "L95",
+                          "U90",
+                          "L90",
+                          "U80",
+                          "L80"
                         ]
                       }
                     }
@@ -263,36 +269,130 @@ alert(l95)
 
             //Extrat Data From JSON Stat
             ds = JSONstat(jsonStatData).Dataset(0);
-            t = ds.Dimension("month").length - 1;
-            year = ds.Dimension("month").id[t];
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
 
             //Format Data
-            var visital = ds.Data({ "indicator/balance": "0" }, false);
+            var mprediction = ds.Data({ "predictioninterval": "MED", "sex":"M" }, false);
+            var mu95 = ds.Data({ "predictioninterval": "U95", "sex":"M" }, false);
+            var ml95 = ds.Data({ "predictioninterval": "L95", "sex":"M" }, false);
 
-            var year = ds.Dimension("month", false);
+            var mu90 = ds.Data({ "predictioninterval": "U90", "sex":"M" }, false);
+            var ml90 = ds.Data({ "predictioninterval": "L90", "sex":"M" }, false);
+
+            var mu80 = ds.Data({ "predictioninterval": "U80", "sex":"M" }, false);
+            var ml80 = ds.Data({ "predictioninterval": "L80", "sex":"M" }, false);
+
+
+            var kprediction = ds.Data({ "predictioninterval": "MED", "sex":"F" }, false);
+            var ku95 = ds.Data({ "predictioninterval": "U95", "sex":"F" }, false);
+            var kl95 = ds.Data({ "predictioninterval": "L95", "sex":"F" }, false);
+
+            var ku90 = ds.Data({ "predictioninterval": "U90", "sex":"F" }, false);
+            var kl90 = ds.Data({ "predictioninterval": "L90", "sex":"F" }, false);
+
+            var ku80 = ds.Data({ "predictioninterval": "U80", "sex":"F" }, false);
+            var kl80 = ds.Data({ "predictioninterval": "L80", "sex":"F" }, false);
+
+
+            var year = ds.Dimension("year", false);
             var fLen = year.length;
 
 
-            var visitalsum = 0;
-            var visitaldata = [];
+
+
+            var mpredictiondata = [];
             for (var i = 0; i < fLen; i++) {
-                year[i] = year[i].replace('M', '-');                
-                visitaldata.push([Date.parse(year[i]), visital[i]]);
-                visitalsum += visital[i];
+                mpredictiondata.push([Date.parse(year[i]), mprediction[i]]);
             }
-     
-            var visitalavg = visitalsum/(fLen-1);
+
+
+            var mf95data = [];
+            for (var i = 0; i < fLen; i++) {
+                mf95data.push([Date.parse(year[i]), mu95[i], ml95[i]]);
+            }            
+
+
+            var mf90data = [];
+            for (var i = 0; i < fLen; i++) {
+                mf90data.push([Date.parse(year[i]), mu90[i], ml90[i]]);
+            }   
+
+
+            var mf80data = [];
+            for (var i = 0; i < fLen; i++) {
+                mf80data.push([Date.parse(year[i]), mu80[i], ml80[i]]);
+            }   
+
+
+            var kpredictiondata = [];
+            for (var i = 0; i < fLen; i++) {
+                kpredictiondata.push([Date.parse(year[i]), kprediction[i]]);
+            }
+
+
+            var kf95data = [];
+            for (var i = 0; i < fLen; i++) {
+                kf95data.push([Date.parse(year[i]), ku95[i], kl95[i]]);
+            }            
+
+
+            var kf90data = [];
+            for (var i = 0; i < fLen; i++) {
+                kf90data.push([Date.parse(year[i]), ku90[i], kl90[i]]);
+            }   
+
+
+            var kf80data = [];
+            for (var i = 0; i < fLen; i++) {
+                kf80data.push([Date.parse(year[i]), ku80[i], kl80[i]]);
+            }               
+
 
 
             //Build Series
             var createdSeries = [{
-                    name: ds.Dimension("indicator/balance").Category("0").label,
-                    data: visitaldata,
+                    name: 'Mannfólk',
+                    data: mpredictiondata,
+                    type: 'line',
                     color: '#2980b9',
                     tooltip: {
                         valueDecimals: 0
+                    },
+                    zIndex: 2
+                }, {
+                    name: '80% vissa',
+                    data: mf80data,
+                    type: 'arearange',
+                    linkedTo: ':previous',                    
+                    color: '#2980b9',
+                    fillOpacity: 0.3,                    
+                    tooltip: {
+                        valueDecimals: 0
                     }
-                }
+                },
+                {
+                    name: 'Konufólk',
+                    data: kpredictiondata,
+                    type: 'line',
+                    color: '#8e44ad',
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    zIndex: 2
+                }, {
+                    name: '80% vissa',
+                    data: kf80data,
+                    type: 'arearange',
+                    linkedTo: ':previous',                    
+                    color: '#8e44ad',
+                    fillOpacity: 0.3,                    
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }  
+
+
             ];
 
 
@@ -302,105 +402,87 @@ alert(l95)
             //Build subtitle
             var subtitle = ds.source;
 
-            //Build Tooltip
-            var tooltipFunction = function() {
-                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
-                var sum = 0;
-                $.each(this.points,
-                    function(i, point) {
-                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0) + ' (' + Highcharts.numberFormat(this.percentage, 1) + ' %)';
-                        sum += point.y;
-                    });
-
-                s += '<br/>Tls.: ' + sum;
-                return s;
-            }
 
             //Build Chart
             $('#chart2').highcharts({
                 credits: {
-		            text: 'Hagstova Føroya',
-		            href: 'http://www.hagstova.fo'
+                        text: 'Hagstova Føroya',
+                        href: 'http://www.hagstova.fo'
                 },
                 chart: {
-		            borderColor: '#bdc3c7',
-		            borderWidth: 1,
-			        marginTop: 80,
-			        spacingTop: 40,			        
-			        marginBottom: 100,			        
-			        spacingBottom: 50,
-			        spacingLeft: 10,
-			        marginRight: 40                    
-                },
+                    type: 'arearange',
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                 
+        },
                 rangeSelector: {
-                    enabled: false,
+                    enabled: false
                 },
-
-                navigator:{
-                    enabled:true,
-                },          
-
+                navigator: {
+                    enabled: true
+                },
                 title: {
-                    text: ds.label
+                    text: "Fólkagongd"
                 },
-                xAxis: {  
+                xAxis: {
                     title: {
-                        enabled: false
+                        enabled: false                                                
                     },
-                    type: 'datetime'
+                    type: 'datetime',
+            
                 },
                 yAxis: {
                     title: {
-                        text: 'Vísital'
-                    },
-                    max: 100,
-                    min: -100,
-                    plotLines: [{
-                        color: 'red',
-                        value: visitalavg, // Insert your average here
-                        width: '1',
-                        zIndex: 2 // To not get stuck below the regular plot lines
-                    }]                    
-
+                        text: 'Fólk'
+                    }                  
                 },
                 tooltip: {
-                    formatter: function() {
-                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
-                            sum = 0;
+                crosshairs: true,
+                shared: true,
+                valueSuffix: 'fólk'
+            },
 
-                        $.each(this.points, function(i, point) {
-                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
-                            sum += point.y;
-                                point.y;
-                            sum += point.y;
-                        });
+            legend: {
+            },
 
-                        return s;
-                    },
-                    shared: true,
 
-                },
-                plotOptions: {
-                    area: {
-                        stacking: 'normal',
-                        lineColor: '#666666',
-                        lineWidth: 1,
-                        marker: {
-                            lineWidth: 1,
-                            lineColor: '#666666'
-                        }
-                    },
-	                series: {
-	                    showInNavigator: true
-	                }                    
-                },
                 series: createdSeries
             });
         }
 
         function loadDataAndBuildChart2() {
-            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB02/kb_bruk.px", {
-                "query": [],
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB09/framro_fo.px", {
+                "query": [
+                    {
+                      "code": "sex",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "MF", "M", "F"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "predictioninterval",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "U95",
+                          "MED",
+                          "L95",
+                          "U90",
+                          "L90",
+                          "U80",
+                          "L80"
+                        ]
+                      }
+                    }
+                  ],
                 "response": {
                     "format": "json-stat"
                 }
@@ -1794,12 +1876,12 @@ alert(l95)
 
 
 
-		<section id="page-title" class="page-title-parallax page-title-dark" style="background-image: url('images/slider/full/2.jpg');"
+		<section id="page-title" class="page-title-parallax page-title-dark" style="background-image: url('images/slider/full/3.jpg');"
 			data-stellar-background-ratio="0.3">
 
 			<div class="container clearfix">
 				<h1>Fólkaframrokning</h1>
-				<span>Fólkatalið framroknað við støði í fólkagongdini. </span>
+				<span>Fólkatalið framroknað við støði í søguligu fólkagongdini. </span>
 				<ol class="breadcrumb">
 					<li><a href="#">Hagstova</a></li>
 					<li><a href="#">Búskapur</a></li>
@@ -1835,12 +1917,30 @@ alert(l95)
                                         </div>
                                     </div>
 
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h3>Íbúgvar býtt á kyn</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            <div id="chart2" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                            
+                                        </div>
+                                    </div>
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h3>Íbúgvar býtt á aldursbólkar</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            <div id="chart3" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                            
+                                        </div>
+                                    </div>
 
 
 
                                     <div class="bottommargin-sm">
                                         <div class="white-section">
-                                        <h4>Brúkaravísital</h4>
+                                        <h4></h4>
                                         <p>Kanningin fevnir um atburð og væntanir hjá brúkarum og er grundað á 15 spurningar, ið verða settir 500-550 brúkarum 2 reisir árliga. Nettotølini, ið er vigað býtið av svarmøguleikunum (liggur millum pluss 100 og minus 100) fyri brúkarar, vísa metingar um fíggjarstøðu hjá einum sjálvum og búskaparstøðan í samfelagnum. Vísitalið er miðal av nettotølum fyri spurningarnar: 1) Fíggjarliga støðan hjá húsarhaldinum um eitt ár sammett við í dag (nettotal), 2) Búskaparstøðan í Føroyum um eitt ár sammett við í dag (nettotal), 3) Arbeiðsloysið um eitt ár sammett við í dag (nettotal) og 4) Væntan hjá húsarhaldinum at spara upp næsta árið (nettotal)</p>
                                         <div id="chart2" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>      
                                         <h4 class="topmargin">Vísital fyri tilfeingisvinnu</h3>
@@ -2135,6 +2235,7 @@ alert(l95)
     <script src="lib/json-stat/json-stat.js"></script>
     <script src="lib/json-stat/utils/json-stat.utils.js"></script>
     <script src="lib/highstock-5.0.0/js/highstock.js"></script>
+    <script src="lib/highstock-5.0.0/js/highcharts-more.js"></script>    
     <script src="lib/highstock-5.0.0/js/modules/exporting.js"></script>
 
     <!--<script src="https://code.highcharts.com/maps/highmaps.js"></script>  -->
