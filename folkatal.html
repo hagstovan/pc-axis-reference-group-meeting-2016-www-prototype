@@ -12,8 +12,10 @@
 	<link rel="stylesheet" href="style.css" type="text/css" />
 	<link rel="stylesheet" href="css/dark.css" type="text/css" />
 	<link rel="stylesheet" href="css/font-icons.css" type="text/css" />
+    <link rel="stylesheet" href="css/motion.css" type="text/css" />    
 	<link rel="stylesheet" href="css/animate.css" type="text/css" />
 	<link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" />
 
 
 	<link rel="stylesheet" href="css/responsive.css" type="text/css" />
@@ -24,12 +26,10 @@
 
 	<!-- Document Title
 	============================================= -->
-	<title>Vísitalið | Hagstova Føroya</title>
-
-
-
+	<title>Fólkatal | Hagstova Føroya</title>
 
     <style>
+
 
     .white-section {
         background-color: #FFF;
@@ -86,45 +86,50 @@ $('html').mouseover(function() {
 
             //Extrat Data From JSON Stat
             ds = JSONstat(jsonStatData).Dataset(0);
-            t = ds.Dimension("month").length - 1;
-            year = ds.Dimension("month").id[t];
-
-            //Format Data
-            var visital = ds.Data({ "indicator": "0" }, false).filter(n => n);
-
-alert(ds.Data({ "indicator": "0"}, false))                
-
-            var year = ds.Dimension("month", false);
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id;
             var fLen = year.length;
+            m = ds.Dimension("month").id;
 
-            var visitalsum = 0;
-            var visitaldata = [];
+           //Format Data
 
+
+
+            var folkataldata = [];
 
             for (var i = 0; i < fLen; i++) {
-                year[i] = year[i].replace('M', '-');                
-                visitaldata.push([Date.parse(year[i]), visital[i]]);
-                visitalsum += visital[i];
-            }
+                folkatal = ds.Data({"changes": "PRIMO", "village/city":"999999", "year": ds.Dimension("year").id[i]}, false).filter(n => n);
 
+                for (var j = 0; j < folkatal.length; j++) {                  
+                    mon = m[j].replace('M', '-');
+                    folkataldata.push([Date.parse(year[i]+mon), folkatal[j]]);
 
-     
-            var visitalavg = visitalsum/(fLen-1);
+                    nextMonth = year[i]+mon
+                        
+                }         
+            }          
+ 
+            var d = new Date(nextMonth);
+            d.setMonth(d.getMonth() + 1);
+  
+            ultimo = ds.Data({"changes": "ULTIMO", "village/city":"999999", "year": ds.Dimension("year").id[fLen-1]}, false).filter(n => n);
+            ultimo = ultimo[ultimo.length-1];
+
+            folkataldata.push([Date.parse(d), ultimo]);
+
+            
 
 
             //Build Series
             var createdSeries = [{
-                    name: ds.Dimension("indicator").Category("0").label,
-                    data: visitaldata,
+                    name: 'Fólkatal',
+                    data: folkataldata,
                     color: '#2980b9',
                     tooltip: {
                         valueDecimals: 0
                     }
                 }
             ];
-
-
-
 
             //Build Title
             var title = ds.label;
@@ -135,30 +140,30 @@ alert(ds.Data({ "indicator": "0"}, false))
             //Build Tooltip
             var tooltipFunction = function() {
                 var s = '<b>' + Highcharts.dateFormat('%Y-%b', this.x) + '</b>';
-                var sum = 0;
                 $.each(this.points,
                     function(i, point) {
-                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0);
+                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0,',','.'); 
                     });
+
                 return s;
             }
 
             //Build Chart
             $('#chart1').highcharts({
                 credits: {
-			            text: 'Hagstova Føroya',
-			            href: 'http://www.hagstova.fo'
+                        text: 'Hagstova Føroya',
+                        href: 'http://www.hagstova.fo'
                 },
                 chart: {
-                    type: 'line',
-		            borderColor: '#bdc3c7',
-		            borderWidth: 1,
-			        marginTop: 80,
-			        spacingTop: 40,			        
-			        marginBottom: 100,			        
-			        spacingBottom: 50,
-			        spacingLeft: 10,
-			        marginRight: 40		            
+                    type: 'area',
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                 
         },
                 rangeSelector: {
                     enabled: false
@@ -167,27 +172,18 @@ alert(ds.Data({ "indicator": "0"}, false))
                     enabled: true
                 },
                 title: {
-                    text: "Samanvigað vísital"
+                    text: "Fólkatal"
                 },
                 xAxis: {
                     title: {
-                        enabled: false                                                
+                        enabled: false
                     },
                     type: 'datetime',
-            
                 },
                 yAxis: {
                     title: {
-                        text: 'Vísital'
-                    },
-                    max: 100,
-                    min: -100,
-                    plotLines: [{
-                        color: 'red',
-                        value: visitalavg, // Insert your average here
-                        width: '1',
-                        zIndex: 2 // To not get stuck below the regular plot lines
-                    }]                    
+                        text: 'Fólk'
+                    }
                 },
                 tooltip: {
                     formatter: tooltipFunction,
@@ -203,27 +199,36 @@ alert(ds.Data({ "indicator": "0"}, false))
                             lineColor: '#666666'
                         }
                     },
-	                series: {
-	                    showInNavigator: true
-	                }                    
+                    series: {
+                        showInNavigator: true
+                    }                    
                 },
                 series: createdSeries
             });
         }
 
         function loadDataAndBuildChart1() {
-            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB01/kb_saml.px", {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB01/fo_vital_md.px", {
                 "query": [
-                    {
-                      "code": "indicator",
-                      "selection": {
-                        "filter": "item",
-                        "values": [
-                          "0"
-                        ]
-                      }
-                    }
-                  ],
+                            {
+                              "code": "village/city",
+                              "selection": {
+                                "filter": "item",
+                                "values": [
+                                  "999999"
+                                ]
+                              }
+                            },
+                            {
+                              "code": "changes",
+                              "selection": {
+                                "filter": "item",
+                                "values": [
+                                  "PRIMO", "ULTIMO"
+                                ]
+                              }
+                            }
+                          ],
                 "response": {
                     "format": "json-stat"
                 }
@@ -235,38 +240,49 @@ alert(ds.Data({ "indicator": "0"}, false))
 
             //Extrat Data From JSON Stat
             ds = JSONstat(jsonStatData).Dataset(0);
-            t = ds.Dimension("month").length - 1;
-            year = ds.Dimension("month").id[t];
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
 
             //Format Data
-            var visital = ds.Data({ "indicator/balance": "0" }, false);
-
-            var year = ds.Dimension("month", false);
+            t=ds.Dimension("year").length-1;
+            year=ds.Dimension("year").id[t];            
+            var ko = ds.Data({"sex": "K"}, false);
+            var ma = ds.Data({"sex": "M"}, false);          
+            var year = ds.Dimension("year", false);
+            
             var fLen = year.length;
 
-
-            var visitalsum = 0;
-            var visitaldata = [];
-            for (var i = 0; i < fLen; i++) {
-                year[i] = year[i].replace('M', '-');                
-                visitaldata.push([Date.parse(year[i]), visital[i]]);
-                visitalsum += visital[i];
+            var kodata = [];
+            for (i = 0; i < fLen; i++) {
+              kodata.push([Date.parse(year[i]), ko[i]]);
             }
-     
-            var visitalavg = visitalsum/(fLen-1);
 
+            var madata = [];
+            for (i = 0; i < fLen; i++) {
+              madata.push([Date.parse(year[i]), ma[i]]);
+
+            }
 
             //Build Series
-            var createdSeries = [{
-                    name: ds.Dimension("indicator/balance").Category("0").label,
-                    data: visitaldata,
+            var createdSeries = [
+                
+                {
+                    name: ds.Dimension("sex").Category("M").label,           
+                    data: madata,               
                     color: '#2980b9',
                     tooltip: {
                         valueDecimals: 0
-                    }
+                    }                   
+                },
+                {
+                    name: ds.Dimension("sex").Category("K").label,           
+                    data: kodata,             
+                    color: '#8e44ad',
+                    tooltip: {
+                        valueDecimals: 0
+                    }                   
                 }
-            ];
-
+                ];
 
             //Build Title
             var title = ds.label;
@@ -276,33 +292,34 @@ alert(ds.Data({ "indicator": "0"}, false))
 
             //Build Tooltip
             var tooltipFunction = function() {
-                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
+                var s = '<b>' + Highcharts.dateFormat('%Y', this.x) + '</b>';
                 var sum = 0;
                 $.each(this.points,
                     function(i, point) {
-                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0) + ' (' + Highcharts.numberFormat(this.percentage, 1) + ' %)';
-                        sum += point.y;
+                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(this.percentage, 1) + ' %';
                     });
 
-                s += '<br/>Tls.: ' + sum;
                 return s;
-            }
+            }            
+
+
 
             //Build Chart
             $('#chart2').highcharts({
                 credits: {
-		            text: 'Hagstova Føroya',
-		            href: 'http://www.hagstova.fo'
+                    text: 'Hagstova Føroya',
+                    href: 'http://www.hagstova.fo'
                 },
                 chart: {
-		            borderColor: '#bdc3c7',
-		            borderWidth: 1,
-			        marginTop: 80,
-			        spacingTop: 40,			        
-			        marginBottom: 100,			        
-			        spacingBottom: 50,
-			        spacingLeft: 10,
-			        marginRight: 40                    
+                    type: 'area',
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                    
                 },
                 rangeSelector: {
                     enabled: false,
@@ -323,34 +340,13 @@ alert(ds.Data({ "indicator": "0"}, false))
                 },
                 yAxis: {
                     title: {
-                        text: 'Vísital'
+                        text: 'Fólk'
                     },
-                    max: 100,
-                    min: -100,
-                    plotLines: [{
-                        color: 'red',
-                        value: visitalavg, // Insert your average here
-                        width: '1',
-                        zIndex: 2 // To not get stuck below the regular plot lines
-                    }]                    
 
                 },
                 tooltip: {
-                    formatter: function() {
-                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
-                            sum = 0;
-
-                        $.each(this.points, function(i, point) {
-                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
-                            sum += point.y;
-                                point.y;
-                            sum += point.y;
-                        });
-
-                        return s;
-                    },
-                    shared: true,
-
+                    formatter: tooltipFunction,
+                    shared: true
                 },
                 plotOptions: {
                     area: {
@@ -362,17 +358,38 @@ alert(ds.Data({ "indicator": "0"}, false))
                             lineColor: '#666666'
                         }
                     },
-	                series: {
-	                    showInNavigator: true
-	                }                    
+                    series: {
+                        showInNavigator: true
+                    }                    
                 },
                 series: createdSeries
             });
         }
 
         function loadDataAndBuildChart2() {
-            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB02/kb_bruk.px", {
-                "query": [],
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB01/fo_aldbygd.px", {
+                "query": [
+                    {
+                      "code": "sex",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "TOT",
+                          "M",
+                          "K"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "village/city",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "999999"
+                        ]
+                      }
+                    },
+                  ],
                 "response": {
                     "format": "json-stat"
                 }
@@ -384,36 +401,89 @@ alert(ds.Data({ "indicator": "0"}, false))
 
             //Extrat Data From JSON Stat
             ds = JSONstat(jsonStatData).Dataset(0);
-            t = ds.Dimension("month").length - 1;
-            year = ds.Dimension("month").id[t];
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
 
             //Format Data
-            var visital = ds.Data({ "indicator/balance": "0" }, false);
 
-            var year = ds.Dimension("month", false);
+            var year = ds.Dimension("year", false);
             var fLen = year.length;
 
+            agegroups = ds.Dimension("age", false);
 
-            var visitalsum = 0;
-            var visitaldata = [];
-            for (var i = 0; i < fLen; i++) {
-                year[i] = year[i].replace('M', '-');                
-                visitaldata.push([Date.parse(year[i]), visital[i]]);
-                visitalsum += visital[i];
+
+
+
+            var sequencesmale = [],
+                i = 0;
+                j = 0;
+                var result = [];
+
+            for(i;i<agegroups.length;i++){
+                result = [];
+
+
+                    for (var j = 0; j < year.length; j++) { 
+
+                        result.push(-ds.Data({"sex": "M", "year": ds.Dimension("year").id[j], "age": ds.Dimension("age").id[i]}, false));
+
+                    }
+
+                sequencesmale.push({
+                    sequence: result
+                })
+
+
             }
-     
-            var visitalavg = visitalsum/(fLen-1);
+            
+
+
+
+            var sequencesfemale = [],
+                i = 0;
+                j = 0;
+                var result = [];
+
+            for(i;i<agegroups.length;i++){
+                result = [];
+
+
+                    for (var j = 0; j < year.length; j++) { 
+
+                        result.push(ds.Data({"sex": "K", "year": ds.Dimension("year").id[j], "age": ds.Dimension("age").id[i]}, false));
+
+                    }
+
+                sequencesfemale.push({
+                    sequence: result
+                })
+
+
+            }
+            
+
+
+
+
 
 
             //Build Series
             var createdSeries = [{
-                    name: ds.Dimension("indicator/balance").Category("0").label,
-                    data: visitaldata,
+                    name: 'Menn',
+                    data: sequencesmale,
                     color: '#2980b9',
                     tooltip: {
                         valueDecimals: 0
                     }
-                }
+                },
+                {
+                    name: 'Kvinnur',
+                    data: sequencesfemale,
+                    color: '#8e44ad',
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }                
             ];
 
             //Build Title
@@ -424,13 +494,8 @@ alert(ds.Data({ "indicator": "0"}, false))
 
             //Build Tooltip
             var tooltipFunction = function() {
-                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
-                var sum = 0;
-                $.each(this.points,
-                    function(i, point) {
-                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0);
-                    });
-                return s;
+                        return '<b>' + this.series.name + ', age ' + this.point.category + '</b><br/>' +
+                        'Population: ' + Highcharts.numberFormat(Math.abs(this.point.y), 0);
             }
 
             //Build Chart
@@ -440,94 +505,127 @@ alert(ds.Data({ "indicator": "0"}, false))
 		            href: 'http://www.hagstova.fo'            
                 },
                 chart: {
+                    type: 'bar',
 		            borderColor: '#bdc3c7',
 		            borderWidth: 1,
-			        marginTop: 80,
-			        spacingTop: 40,			        
-			        marginBottom: 100,			        
-			        spacingBottom: 50,
-			        spacingLeft: 10,
-			        marginRight: 40                    
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                         
+              
                 },
                 rangeSelector: {
                     enabled: false,
                 },
 
                 navigator:{
-                    enabled:true,
-                },          
+                    enabled:false,
+                },        
 
                 title: {
-                    text: ds.label
+                    text: 'Aldur'
                 },
-                xAxis: {  
-                    title: {
-                        enabled: false
-                    },
-                    type: 'datetime',
-
-                },
+                xAxis: [{
+                categories: ds.Dimension("age", false),
+                reversed: false,
+                labels: {
+                    step: 1
+                    }
+                }],
                 yAxis: {
-                    title: {
-                        text: 'Vísital'
+                    title: 'Fólk',
+                    labels: {
+                        formatter: function () {
+                        return Math.abs(this.value);
+                        },
                     },
-                    max: 100,
-                    min: -100,
-                    plotLines: [{
-                        color: 'red',
-                        value: visitalavg, // Insert your average here
-                        width: '1',
-                        zIndex: 2 // To not get stuck below the regular plot lines
-                    }]   
+                    min: -2500,   
+                    max: 2500
+                     
+                },
+
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },                
+                motion: {
+                    enabled: true,
+                    axisLabel: 'year',
+                    labels: ds.Dimension("year", false),
+                    series: [0, 1], // The series which holds points to update
+                    updateInterval: 20,
+                    magnet: {
+                        type: 'both', // thumb / point / both
+                        round: 'floor', // ceil / floor / round
+                        smoothThumb: true, // defaults to true
+                        step: 0.05
+                    },
+
 
                 },
                 tooltip: {
-                    formatter: function() {
-                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
-                            sum = 0;
-
-                        $.each(this.points, function(i, point) {
-                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
-                            sum += point.y;
-                                point.y;
-                            sum += point.y;
-                        });
-
-                        return s;
-                    },
-                    shared: true,
-
-                },
-                plotOptions: {
-                    area: {
-                        stacking: 'normal',
-                        lineColor: '#666666',
-                        lineWidth: 1,
-                        marker: {
-                            lineWidth: 1,
-                            lineColor: '#666666'
-                        }
-                    },
-	                series: {
-	                    showInNavigator: true
-	                }                    
-                },
+                    formatter: function () {
+                        return '<b>' + this.series.name + ', aldursbólkur ' + this.point.category + '</b><br/>' +
+                            'Fólk: ' + Highcharts.numberFormat(Math.abs(this.point.y), 0);
+                    }
+                },                
                 series: createdSeries
             });
         }
 
         function loadDataAndBuildChart3() {
-            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB03/kb_tilsam.px", {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB01/fo_aldbygd.px", {
                 "query": [
                     {
-                      "code": "indicator/balance",
+                      "code": "sex",
                       "selection": {
                         "filter": "item",
                         "values": [
-                          "0"
+                          "M", "K"
                         ]
                       }
-                    }
+                    },
+                    {
+                      "code": "village/city",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "999999"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "age",
+                      "selection": {
+                        "filter": "agg:aldur5.agg",
+                        "values": [
+                          "00-04 ár",
+                          "05-09 ár",
+                          "10-14 ár",
+                          "15-19 ár",
+                          "20-24 ár",
+                          "25-29 ár",
+                          "30-34 ár",
+                          "35-39 ár",
+                          "40-44 ár",
+                          "45-49 ár",
+                          "50-54 ár",
+                          "55-59 ár",
+                          "60-64 ár",
+                          "65-69 ár",
+                          "70-74 ár",
+                          "75-79 ár",
+                          "80-84 ár",
+                          "85-89 ár",
+                          "90-94 ár",
+                          "95-99 ár",
+                          "100 ár o.e."
+                        ]
+                      }
+                    },
                   ],
                 "response": {
                   "format": "json-stat"
@@ -539,40 +637,61 @@ alert(ds.Data({ "indicator": "0"}, false))
         function buildChart4(jsonStatData) {
             //Extrat Data From JSON Stat
             ds = JSONstat(jsonStatData).Dataset(0);
-            t = ds.Dimension("month").length - 1;
-            year = ds.Dimension("month").id[t];
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
 
-            //Format Data
-            var visital = ds.Data({ "indicator/balance": "0" }, false);
-
-            var year = ds.Dimension("month", false);
             var fLen = year.length;
 
 
-            var visitalsum = 0;
-            var visitaldata = [];
-            for (var i = 0; i < fLen; i++) {
-                year[i] = year[i].replace('M', '-');                
-                visitaldata.push([Date.parse(year[i]), visital[i]]);
-                visitalsum += visital[i];
+            //Format Data
+            var year = ds.Dimension("year", false);
+            var fLen = year.length;
+            agegroups = ds.Dimension("age", false);
+
+            var ageseries = [],
+                i = 1;
+                j = 0;
+                var result = [];
+
+            for(i;i<agegroups.length;i++){
+                result = [];
+
+
+                    for (var j = 0; j < year.length; j++) { 
+
+                        result.push([Date.parse(year[j]), ds.Data({"sex": "TOT", "year": ds.Dimension("year").id[j], "age": ds.Dimension("age").id[i]}, false)/ds.Data({"sex": "TOT", "year": ds.Dimension("year").id[j], "age": ds.Dimension("age").id[0]}, false)*100]);
+                    }
+
+                        
+
+                    ageseries.push({
+                    name: ds.Dimension("age").Category(ds.Dimension("age").id[i]).label,
+                    data: result,
+                    index: agegroups.length - i
+                })
+
             }
-     
-            var visitalavg = visitalsum/(fLen-1);
+
+
+            //Build Tooltip
+            var tooltipFunction = function() {
+                var s = '<b>' + Highcharts.dateFormat('%Y', this.x) + '</b>';
+                var sum = 0;
+                $.each(this.points,
+                    function(i, point) {
+                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(this.percentage, 1) + ' %';
+                    });
+
+                return s;
+            }            
+
 
 
             //Build Series
-            var createdSeries = [{
-                    name: ds.Dimension("indicator/balance").Category("0").label,
-                    data: visitaldata,
-                    color: '#2980b9',
-                    tooltip: {
-                        valueDecimals: 0
-                    }
-                }
-            ];
+            var createdSeries = ageseries;
 
             //Build Title
-            var title = ds.label;
+            var title = "Fólkið býtt á aldursbólkar";
 
             //Build subtitle
             var subtitle = ds.source;
@@ -585,6 +704,7 @@ alert(ds.Data({ "indicator": "0"}, false))
                     href: 'http://www.hagstova.fo'            
                 },
                 chart: {
+                    type: 'area',
                     borderColor: '#bdc3c7',
                     borderWidth: 1,
                     marginTop: 80,
@@ -614,43 +734,23 @@ alert(ds.Data({ "indicator": "0"}, false))
                 },
                 yAxis: {
                     title: {
-                        text: 'Vísital'
+                        text: '% av fólkinum'
                     },
                     max: 100,
-                    min: -100,
-                    plotLines: [{
-                        color: 'red',
-                        value: visitalavg, // Insert your average here
-                        width: '1',
-                        zIndex: 2 // To not get stuck below the regular plot lines
-                    }]   
+                    min: 0
 
                 },
                 tooltip: {
-                    formatter: function() {
-                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
-                            sum = 0;
-
-                        $.each(this.points, function(i, point) {
-                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
-                            sum += point.y;
-                                point.y;
-                            sum += point.y;
-                        });
-
-                        return s;
-                    },
-                    shared: true,
-
-                },
+                    formatter: tooltipFunction,
+                    shared: true
+                },               
                 plotOptions: {
-                    area: {
+                    area: {                    
                         stacking: 'normal',
                         lineColor: '#666666',
                         lineWidth: 1,
                         marker: {
-                            lineWidth: 1,
-                            lineColor: '#666666'
+                            enabled: false
                         }
                     },
                     series: {
@@ -662,17 +762,41 @@ alert(ds.Data({ "indicator": "0"}, false))
         }
 
         function loadDataAndBuildChart4() {
-            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB04/kb_bygsam.px", {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB01/fo_aldbygd.px", {
                   "query": [
                     {
-                      "code": "indicator/balance",
+                      "code": "sex",
                       "selection": {
                         "filter": "item",
                         "values": [
-                          "0"
+                          "TOT"
                         ]
                       }
-                    }
+                    },
+                    {
+                      "code": "village/city",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "999999"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "age",
+                      "selection": {
+                        "filter": "agg:aldur20.agg",
+                        "values": [
+                          "Tils. (aldur)",
+                          "00-19 ár",
+                          "20-39 ár",
+                          "40-59 ár",
+                          "60-79 ár",
+                          "80-99 ár",
+                          "100 ár o.e."
+                        ]
+                      }
+                    },
                   ],
 				  "response": {
 				    "format": "json-stat"
@@ -790,21 +914,9 @@ alert(ds.Data({ "indicator": "0"}, false))
 
                 },
                 tooltip: {
-                    formatter: function() {
-                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
-                            sum = 0;
-
-                        $.each(this.points, function(i, point) {
-                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
-                            sum += point.y;
-                                point.y;
-                            sum += point.y;
-                        });
-
-                        return s;
-                    },
-                    shared: true,
-
+                    formatter: tooltipFunction,
+                    valueDecimals: 1,
+                    shared: true
                 },
                 plotOptions: {
                     area: {
@@ -1378,7 +1490,7 @@ alert(ds.Data({ "indicator": "0"}, false))
 									<ul class="mega-menu-column col-md-3">
 										<li class="mega-menu-title"><a href="#"><div>Fólkatal</div></a>
 											<ul>
-												<li><a href="blog.html"><div id="folkatal">Fólkatal</div></a></li>
+												<li><a href="folkatal.html"><div id="folkatal">Fólkatal</div></a></li>
 												<li><a href="blog-left-sidebar.html"><div id="forsyrgjarabyrda">Forsyrgjarabyrða</div></a></li>
 												<li><a href="blog-both-sidebar.html"><div>Fólkaframrokning</div></a></li>
 											</ul>
@@ -1766,12 +1878,12 @@ alert(ds.Data({ "indicator": "0"}, false))
 
 
 
-		<section id="page-title" class="page-title-parallax page-title-dark" style="background-image: url('images/slider/full/2.jpg');"
+		<section id="page-title" class="page-title-parallax page-title-dark" style="background-image: url('images/slider/full/3.jpg');"
 			data-stellar-background-ratio="0.3">
 
 			<div class="container clearfix">
-				<h1>Vísitalið</h1>
-				<span>Hugburður til egnar umstøður og væntanir til framtíðina. </span>
+				<h1>Fólkatal</h1>
+				<span>Gongdin í fólkatalinum. </span>
 				<ol class="breadcrumb">
 					<li><a href="#">Hagstova</a></li>
 					<li><a href="#">Búskapur</a></li>
@@ -1800,19 +1912,47 @@ alert(ds.Data({ "indicator": "0"}, false))
 
                                     <div class="bottommargin-sm">
                                         <div class="white-section">
-                                            <h2>Samanvigað vísital</h2>
+                                            <h1>Íbúgvar</h1>
                                             <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
-                                            <div id="chart1" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
                                             
                                         </div>
                                     </div>
 
 
 
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h2>Íbúgvar tilsamans</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar.</p>
+                                            <div id="chart1" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                            
+                                        </div>
+                                    </div>
+
 
                                     <div class="bottommargin-sm">
                                         <div class="white-section">
-                                        <h4>Brúkaravísital</h4>
+                                            <h3>Íbúgvar býtt á kyn</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            <div id="chart2" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                            
+                                        </div>
+                                    </div>
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h3>Íbúgvar býtt á aldursbólkar</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            <div id="chart3" style="border-width: 1px; min-width: 310px; height: 600px; margin: 0 auto; padding-bottom: 50px"></div>  
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                        <h4>Tekstur</h4>
                                         <p>Kanningin fevnir um atburð og væntanir hjá brúkarum og er grundað á 15 spurningar, ið verða settir 500-550 brúkarum 2 reisir árliga. Nettotølini, ið er vigað býtið av svarmøguleikunum (liggur millum pluss 100 og minus 100) fyri brúkarar, vísa metingar um fíggjarstøðu hjá einum sjálvum og búskaparstøðan í samfelagnum. Vísitalið er miðal av nettotølum fyri spurningarnar: 1) Fíggjarliga støðan hjá húsarhaldinum um eitt ár sammett við í dag (nettotal), 2) Búskaparstøðan í Føroyum um eitt ár sammett við í dag (nettotal), 3) Arbeiðsloysið um eitt ár sammett við í dag (nettotal) og 4) Væntan hjá húsarhaldinum at spara upp næsta árið (nettotal)</p>
                                         <div id="chart2" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>      
                                         <h4 class="topmargin">Vísital fyri tilfeingisvinnu</h3>
@@ -2107,6 +2247,7 @@ alert(ds.Data({ "indicator": "0"}, false))
     <script src="lib/json-stat/json-stat.js"></script>
     <script src="lib/json-stat/utils/json-stat.utils.js"></script>
     <script src="lib/highstock-5.0.0/js/highstock.js"></script>
+    <script src="lib/highstock-5.0.0/js/highcharts-more.js"></script>    
     <script src="lib/highstock-5.0.0/js/modules/exporting.js"></script>
 
     <!--<script src="https://code.highcharts.com/maps/highmaps.js"></script>  -->
@@ -2114,6 +2255,7 @@ alert(ds.Data({ "indicator": "0"}, false))
     <script src="https://code.highcharts.com/maps/modules/data.js"></script>
     <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
 
+    <script src="js/Motion-Highcharts-Plugin-master/motion.js"></script>
     
 
 <script>
