@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="author" content="SemiColonWeb" />
+
+	<!-- Stylesheets
+	============================================= -->
+	<link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+	<link rel="stylesheet" href="style.css" type="text/css" />
+	<link rel="stylesheet" href="css/dark.css" type="text/css" />
+	<link rel="stylesheet" href="css/font-icons.css" type="text/css" />
+    <link rel="stylesheet" href="css/motion.css" type="text/css" />    
+	<link rel="stylesheet" href="css/animate.css" type="text/css" />
+	<link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
+
+
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" />
+
+
+	<link rel="stylesheet" href="css/responsive.css" type="text/css" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!--[if lt IE 9]>
+		<script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+	<![endif]-->
+
+	<!-- Document Title
+	============================================= -->
+	<title>Fólkaframrokning | Hagstova Føroya</title>
+
+
+
+
+    <style>
+
+    .white-section {
+        background-color: #FFF;
+        padding: 25px 20px;
+        -webkit-box-shadow: 0px 1px 1px 0px #dfdfdf;
+        box-shadow: 0px 1px 1px 0px #dfdfdf;
+        border-radius: 3px;
+    }
+
+    .white-section label {
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .white-section pre { margin-top: 15px; }
+
+    .dark .white-section {
+        background-color: #111;
+        -webkit-box-shadow: 0px 1px 1px 0px #444;
+        box-shadow: 0px 1px 1px 0px #444;
+    }
+
+    </style>
+
+
+
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+
+<script>
+$('html').mouseover(function() {
+    $( "#folkatal" ).mouseover(function() {
+      $('#helptext').text('Gongdin í fólkatalinum í Føroyum');
+    });
+    $( "#folkatal" ).mouseout(function() {
+      $('#helptext').text('');
+    });
+
+});
+
+</script>
+
+
+</head>
+
+<body class="stretched">
+
+<script type="text/javascript">
+
+            
+
+        //Chart 1 specific functions
+        function buildChart1(jsonStatData) {
+
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
+
+            //Format Data
+            var prediction = ds.Data({ "predictioninterval": "MED" }, false);
+            var u95 = ds.Data({ "predictioninterval": "U95" }, false);
+            var l95 = ds.Data({ "predictioninterval": "L95" }, false);
+
+            var u90 = ds.Data({ "predictioninterval": "U90" }, false);
+            var l90 = ds.Data({ "predictioninterval": "L90" }, false);
+
+            var u80 = ds.Data({ "predictioninterval": "U80" }, false);
+            var l80 = ds.Data({ "predictioninterval": "L80" }, false);
+
+
+            var year = ds.Dimension("year", false);
+            var fLen = year.length;
+
+
+
+
+            var predictiondata = [];
+            for (var i = 0; i < fLen; i++) {
+                predictiondata.push([Date.parse(year[i]), prediction[i]]);
+            }
+
+
+            var f95data = [];
+            for (var i = 0; i < fLen; i++) {
+                f95data.push([Date.parse(year[i]), u95[i], l95[i]]);
+            }            
+
+
+            var f90data = [];
+            for (var i = 0; i < fLen; i++) {
+                f90data.push([Date.parse(year[i]), u90[i], l90[i]]);
+            }   
+
+
+            var f80data = [];
+            for (var i = 0; i < fLen; i++) {
+                f80data.push([Date.parse(year[i]), u80[i], l80[i]]);
+            }   
+
+            //Build Series
+            var createdSeries = [{
+                    name: 'Fólkagongd (Median)',
+                    data: predictiondata,
+                    type: 'line',
+                    color: '#c0392b',
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    zIndex: 2
+                }, {
+                    name: '95% sannlíkindi',
+                    data: f95data,
+                    type: 'arearange',
+                    color: '#f1c40f',
+                    linkedTo: ':previous',                     
+                    fillOpacity: 0.1,     
+
+
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }, {
+                    name: '90% sannlíkindi',
+                    data: f90data,
+                    type: 'arearange',
+                    color: '#f39c12',
+                    fillOpacity: 0.1,      
+                    linkedTo: ':previous',                                      
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }, {
+                    name: '80% sannlíkindi',
+                    data: f80data,
+                    type: 'arearange',
+                    color: '#c0392b',
+                    fillOpacity: 0.1,      
+                    linkedTo: ':previous',                                      
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }                    
+            ];
+
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+            //Build Chart
+            $('#chart1').highcharts({
+                credits: {
+			            text: 'Hagstova Føroya',
+			            href: 'http://www.hagstova.fo'
+                },
+                chart: {
+                    type: 'arearange',
+		            borderColor: '#bdc3c7',
+		            borderWidth: 1,
+			        marginTop: 80,
+			        spacingTop: 40,			        
+			        marginBottom: 100,			        
+			        spacingBottom: 50,
+			        spacingLeft: 10,
+			        marginRight: 40		            
+        },
+                rangeSelector: {
+                    enabled: false
+                },
+                navigator: {
+                    enabled: true
+                },
+                title: {
+                    text: "Fólkagongd"
+                },
+                xAxis: {
+                    title: {
+                        enabled: false                                                
+                    },
+                    type: 'datetime',
+            
+                },
+                yAxis: {
+                    title: {
+                        text: 'Fólk'
+                    }                  
+                },
+                tooltip: {
+                crosshairs: true,
+                shared: true,
+                valueSuffix: 'fólk'
+            },
+
+            legend: {
+            },
+
+
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart1() {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB09/framro_fo.px", {
+                "query": [
+                    {
+                      "code": "sex",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "MF"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "predictioninterval",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "U95",
+                          "MED",
+                          "L95",
+                          "U90",
+                          "L90",
+                          "U80",
+                          "L80"
+                        ]
+                      }
+                    }
+                  ],
+                "response": {
+                    "format": "json-stat"
+                }
+            }, buildChart1);
+        }
+		
+		//Chart 2 specific functions
+        function buildChart2(jsonStatData) {
+
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
+
+            //Format Data
+            var mprediction = ds.Data({ "predictioninterval": "MED", "sex":"M" }, false);
+            var mu95 = ds.Data({ "predictioninterval": "U95", "sex":"M" }, false);
+            var ml95 = ds.Data({ "predictioninterval": "L95", "sex":"M" }, false);
+
+            var mu90 = ds.Data({ "predictioninterval": "U90", "sex":"M" }, false);
+            var ml90 = ds.Data({ "predictioninterval": "L90", "sex":"M" }, false);
+
+            var mu80 = ds.Data({ "predictioninterval": "U80", "sex":"M" }, false);
+            var ml80 = ds.Data({ "predictioninterval": "L80", "sex":"M" }, false);
+
+
+            var kprediction = ds.Data({ "predictioninterval": "MED", "sex":"F" }, false);
+            var ku95 = ds.Data({ "predictioninterval": "U95", "sex":"F" }, false);
+            var kl95 = ds.Data({ "predictioninterval": "L95", "sex":"F" }, false);
+
+            var ku90 = ds.Data({ "predictioninterval": "U90", "sex":"F" }, false);
+            var kl90 = ds.Data({ "predictioninterval": "L90", "sex":"F" }, false);
+
+            var ku80 = ds.Data({ "predictioninterval": "U80", "sex":"F" }, false);
+            var kl80 = ds.Data({ "predictioninterval": "L80", "sex":"F" }, false);
+
+
+            var year = ds.Dimension("year", false);
+            var fLen = year.length;
+
+
+
+
+            var mpredictiondata = [];
+            for (var i = 0; i < fLen; i++) {
+                mpredictiondata.push([Date.parse(year[i]), mprediction[i]]);
+            }
+
+
+            var mf95data = [];
+            for (var i = 0; i < fLen; i++) {
+                mf95data.push([Date.parse(year[i]), mu95[i], ml95[i]]);
+            }            
+
+
+            var mf90data = [];
+            for (var i = 0; i < fLen; i++) {
+                mf90data.push([Date.parse(year[i]), mu90[i], ml90[i]]);
+            }   
+
+
+            var mf80data = [];
+            for (var i = 0; i < fLen; i++) {
+                mf80data.push([Date.parse(year[i]), mu80[i], ml80[i]]);
+            }   
+
+
+            var kpredictiondata = [];
+            for (var i = 0; i < fLen; i++) {
+                kpredictiondata.push([Date.parse(year[i]), kprediction[i]]);
+            }
+
+
+            var kf95data = [];
+            for (var i = 0; i < fLen; i++) {
+                kf95data.push([Date.parse(year[i]), ku95[i], kl95[i]]);
+            }            
+
+
+            var kf90data = [];
+            for (var i = 0; i < fLen; i++) {
+                kf90data.push([Date.parse(year[i]), ku90[i], kl90[i]]);
+            }   
+
+
+            var kf80data = [];
+            for (var i = 0; i < fLen; i++) {
+                kf80data.push([Date.parse(year[i]), ku80[i], kl80[i]]);
+            }               
+
+
+
+            //Build Series
+            var createdSeries = [{
+                    name: 'Mannfólk',
+                    data: mpredictiondata,
+                    type: 'line',
+                    color: '#2980b9',
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    zIndex: 2
+                }, {
+                    name: '80% sannlíkindi',
+                    data: mf80data,
+                    type: 'arearange',
+                    linkedTo: ':previous',                    
+                    color: '#2980b9',
+                    fillOpacity: 0.1,                    
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                },
+                {
+                    name: 'Konufólk',
+                    data: kpredictiondata,
+                    type: 'line',
+                    color: '#8e44ad',
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    zIndex: 2
+                }, {
+                    name: '80% sannlíkindi',
+                    data: kf80data,
+                    type: 'arearange',
+                    linkedTo: ':previous',                    
+                    color: '#8e44ad',
+                    fillOpacity: 0.1,                    
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }  
+
+
+            ];
+
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+
+            //Build Chart
+            $('#chart2').highcharts({
+                credits: {
+                        text: 'Hagstova Føroya',
+                        href: 'http://www.hagstova.fo'
+                },
+                chart: {
+                    type: 'arearange',
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                 
+        },
+                rangeSelector: {
+                    enabled: false
+                },
+                navigator: {
+                    enabled: true
+                },
+                title: {
+                    text: "Fólkagongd"
+                },
+                xAxis: {
+                    title: {
+                        enabled: false                                                
+                    },
+                    type: 'datetime',
+            
+                },
+                yAxis: {
+                    title: {
+                        text: 'Fólk'
+                    }                  
+                },
+                tooltip: {
+                crosshairs: true,
+                shared: true,
+                valueSuffix: 'fólk'
+            },
+
+            legend: {
+            },
+
+
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart2() {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB09/framro_fo.px", {
+                "query": [
+                    {
+                      "code": "sex",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "MF", "M", "F"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "predictioninterval",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "U95",
+                          "MED",
+                          "L95",
+                          "U90",
+                          "L90",
+                          "U80",
+                          "L80"
+                        ]
+                      }
+                    }
+                  ],
+                "response": {
+                    "format": "json-stat"
+                }
+            }, buildChart2);
+        }
+
+        //Chart 3 specific functions
+        function buildChart3(jsonStatData) {
+
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("year").length - 1;
+            year = ds.Dimension("year").id[t];
+
+            //Format Data
+
+            var year = ds.Dimension("year", false);
+            var fLen = year.length;
+
+            agegroups = ds.Dimension("age", false);
+
+
+
+
+            var sequencesmale = [],
+                i = 0;
+                j = 0;
+                var result = [];
+
+            for(i;i<agegroups.length;i++){
+                result = [];
+
+
+                    for (var j = 0; j < year.length; j++) { 
+
+                        result.push(-ds.Data({"sex": "M", "year": ds.Dimension("year").id[j], "age": ds.Dimension("age").id[i]}, false));
+
+                    }
+
+                sequencesmale.push({
+                    sequence: result
+                })
+
+
+            }
+            
+
+
+
+            var sequencesfemale = [],
+                i = 0;
+                j = 0;
+                var result = [];
+
+            for(i;i<agegroups.length;i++){
+                result = [];
+
+
+                    for (var j = 0; j < year.length; j++) { 
+
+                        result.push(ds.Data({"sex": "F", "year": ds.Dimension("year").id[j], "age": ds.Dimension("age").id[i]}, false));
+
+                    }
+
+                sequencesfemale.push({
+                    sequence: result
+                })
+
+
+            }
+            
+
+
+
+
+
+
+            //Build Series
+            var createdSeries = [{
+                    name: 'Menn',
+                    data: sequencesmale,
+                    color: '#2980b9',
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                },
+                {
+                    name: 'Kvinnur',
+                    data: sequencesfemale,
+                    color: '#8e44ad',
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }                
+            ];
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+            //Build Tooltip
+            var tooltipFunction = function() {
+                        return '<b>' + this.series.name + ', age ' + this.point.category + '</b><br/>' +
+                        'Population: ' + Highcharts.numberFormat(Math.abs(this.point.y), 0);
+            }
+
+            //Build Chart
+            $('#chart3').highcharts({
+                credits: {
+		            text: 'Hagstova Føroya',
+		            href: 'http://www.hagstova.fo'            
+                },
+                chart: {
+                    type: 'bar',
+		            borderColor: '#bdc3c7',
+		            borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                         
+              
+                },
+                rangeSelector: {
+                    enabled: false,
+                },
+
+                navigator:{
+                    enabled:false,
+                },        
+
+                title: {
+                    text: 'Aldur'
+                },
+                xAxis: [{
+                categories: ds.Dimension("age", false),
+                reversed: false,
+                labels: {
+                    step: 1
+                    }
+                }],
+                yAxis: {
+                    title: 'Fólk',
+                    labels: {
+                        formatter: function () {
+                        return Math.abs(this.value);
+                        },
+                    },
+                    min: -2000,   
+                    max: 2000
+                     
+                },
+
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },                
+                motion: {
+                    enabled: true,
+                    axisLabel: 'year',
+                    labels: ds.Dimension("year", false),
+                    series: [0, 1], // The series which holds points to update
+                    updateInterval: 20,
+                    magnet: {
+                        type: 'both', // thumb / point / both
+                        round: 'floor', // ceil / floor / round
+                        smoothThumb: true, // defaults to true
+                        step: 0.05
+                    },
+
+
+                },
+                tooltip: {
+                    formatter: function () {
+                        return '<b>' + this.series.name + ', aldursbólkur ' + this.point.category + '</b><br/>' +
+                            'Fólk: ' + Highcharts.numberFormat(Math.abs(this.point.y), 0);
+                    }
+                },                
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart3() {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/IB/IB09/framro_fo.px", {
+                "query": [
+                    {
+                      "code": "sex",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "M", "F"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "predictioninterval",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "MED"
+                        ]
+                      }
+                    },
+                    {
+                      "code": "age",
+                      "selection": {
+                        "filter": "agg:aldur5.agg",
+                        "values": [
+                          "00-04 ár",
+                          "05-09 ár",
+                          "10-14 ár",
+                          "15-19 ár",
+                          "20-24 ár",
+                          "25-29 ár",
+                          "30-34 ár",
+                          "35-39 ár",
+                          "40-44 ár",
+                          "45-49 ár",
+                          "50-54 ár",
+                          "55-59 ár",
+                          "60-64 ár",
+                          "65-69 ár",
+                          "70-74 ár",
+                          "75-79 ár",
+                          "80-84 ár",
+                          "85-89 ár",
+                          "90-94 ár",
+                          "95-99 ár",
+                          "100 ár o.e."
+                        ]
+                      }
+                    },
+                  ],
+                "response": {
+                  "format": "json-stat"
+                }
+            }, buildChart3);
+        }
+
+        //Chart 4 specific functions
+        function buildChart4(jsonStatData) {
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("month").length - 1;
+            year = ds.Dimension("month").id[t];
+
+            //Format Data
+            var visital = ds.Data({ "indicator/balance": "0" }, false);
+
+            var year = ds.Dimension("month", false);
+            var fLen = year.length;
+
+
+            var visitalsum = 0;
+            var visitaldata = [];
+            for (var i = 0; i < fLen; i++) {
+                year[i] = year[i].replace('M', '-');                
+                visitaldata.push([Date.parse(year[i]), visital[i]]);
+                visitalsum += visital[i];
+            }
+     
+            var visitalavg = visitalsum/(fLen-1);
+
+
+            //Build Series
+            var createdSeries = [{
+                    name: ds.Dimension("indicator/balance").Category("0").label,
+                    data: visitaldata,
+                    color: '#2980b9',
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }
+            ];
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+
+            //Build Chart
+            $('#chart4').highcharts({
+                credits: {
+                    text: 'Hagstova Føroya',
+                    href: 'http://www.hagstova.fo'            
+                },
+                chart: {
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                    
+                },
+                rangeSelector: {
+                    enabled: false,
+                },
+
+                navigator:{
+                    enabled:true,
+                },          
+
+                title: {
+                    text: ds.label
+                },
+                xAxis: {  
+                    title: {
+                        enabled: false
+                    },
+                    type: 'datetime',
+
+                },
+                yAxis: {
+                    title: {
+                        text: 'Vísital'
+                    },
+                    max: 100,
+                    min: -100,
+                    plotLines: [{
+                        color: 'red',
+                        value: visitalavg, // Insert your average here
+                        width: '1',
+                        zIndex: 2 // To not get stuck below the regular plot lines
+                    }]   
+
+                },
+                tooltip: {
+                    formatter: function() {
+                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
+                            sum = 0;
+
+                        $.each(this.points, function(i, point) {
+                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
+                            sum += point.y;
+                                point.y;
+                            sum += point.y;
+                        });
+
+                        return s;
+                    },
+                    shared: true,
+
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'normal',
+                        lineColor: '#666666',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#666666'
+                        }
+                    },
+                    series: {
+                        showInNavigator: true
+                    }                    
+                },
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart4() {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB04/kb_bygsam.px", {
+                  "query": [
+                    {
+                      "code": "indicator/balance",
+                      "selection": {
+                        "filter": "item",
+                        "values": [
+                          "0"
+                        ]
+                      }
+                    }
+                  ],
+				  "response": {
+				    "format": "json-stat"
+				  }
+            }, buildChart4);
+        }
+
+
+
+
+
+
+
+
+        //Chart 5 specific functions
+        function buildChart5(jsonStatData) {
+
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("month").length - 1;
+            year = ds.Dimension("month").id[t];
+
+            //Format Data
+            var visital = ds.Data({ "indicator/balance": "0" }, false);
+
+            var year = ds.Dimension("month", false);
+            var fLen = year.length;
+
+
+            var visitalsum = 0;
+            var visitaldata = [];
+            for (var i = 0; i < fLen; i++) {
+                year[i] = year[i].replace('M', '-');                
+                visitaldata.push([Date.parse(year[i]), visital[i]]);
+                visitalsum += visital[i];
+            }
+     
+            var visitalavg = visitalsum/(fLen-1);
+
+            //Build Series
+            var createdSeries = [{
+                    name: ds.Dimension("indicator/balance").Category("0").label,
+                    data: visitaldata,
+                    color: '#2980b9',
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }
+            ];
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+            //Build Tooltip
+            var tooltipFunction = function() {
+                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
+                var sum = 0;
+                $.each(this.points,
+                    function(i, point) {
+                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0);
+                    });
+                return s;
+            }
+
+
+            //Build Chart
+            $('#chart5').highcharts({
+                credits: {
+                    text: 'Hagstova Føroya',
+                    href: 'http://www.hagstova.fo'            
+                },
+                chart: {
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                    
+                },
+                rangeSelector: {
+                    enabled: false,
+                },
+
+                navigator:{
+                    enabled:true,
+                },          
+
+                title: {
+                    text: ds.label
+                },
+                xAxis: {  
+                    title: {
+                        enabled: false
+                    },
+                    type: 'datetime',
+
+                },
+                yAxis: {
+                    title: {
+                        text: 'Vísital'
+                    },
+                    max: 100,
+                    min: -100,
+                    plotLines: [{
+                        color: 'red',
+                        value: visitalavg, // Insert your average here
+                        width: '1',
+                        zIndex: 2 // To not get stuck below the regular plot lines
+                    }]   
+
+                },
+                tooltip: {
+                    formatter: function() {
+                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
+                            sum = 0;
+
+                        $.each(this.points, function(i, point) {
+                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
+                            sum += point.y;
+                                point.y;
+                            sum += point.y;
+                        });
+
+                        return s;
+                    },
+                    shared: true,
+
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'normal',
+                        lineColor: '#666666',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#666666'
+                        }
+                    },
+                    series: {
+                        showInNavigator: true
+                    }                    
+                },
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart5() {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB05/kb_hansam.px", {
+                 "query": [],
+			  "response": {
+			    "format": "json-stat"
+			  }
+            }, buildChart5);
+        }
+
+
+
+        //Chart 6 specific functions
+        function buildChart6(jsonStatData) {
+
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("month").length - 1;
+            year = ds.Dimension("month").id[t];
+
+            //Format Data
+            var visital = ds.Data({ "indicator/balance": "0" }, false);
+
+            var year = ds.Dimension("month", false);
+            var fLen = year.length;
+
+
+            var visitalsum = 0;
+            var visitaldata = [];
+            for (var i = 0; i < fLen; i++) {
+                year[i] = year[i].replace('M', '-');                
+                visitaldata.push([Date.parse(year[i]), visital[i]]);
+                visitalsum += visital[i];
+            }
+     
+            var visitalavg = visitalsum/(fLen-1);
+
+
+            //Build Series
+            var createdSeries = [{
+                    name: ds.Dimension("indicator/balance").Category("0").label,
+                    data: visitaldata,
+                    color: '#2980b9',
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }
+            ];
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+            //Build Tooltip
+            var tooltipFunction = function() {
+                var s = '<b>' + Highcharts.dateFormat('%Y-%m', this.x) + '</b>';
+                var sum = 0;
+                $.each(this.points,
+                    function(i, point) {
+                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0);
+                    });
+                return s;
+            }
+
+
+            //Build Chart
+            $('#chart6').highcharts({
+                credits: {
+                    text: 'Hagstova Føroya',
+                    href: 'http://www.hagstova.fo'            
+                },
+                chart: {
+                    borderColor: '#bdc3c7',
+                    borderWidth: 1,
+                    marginTop: 80,
+                    spacingTop: 40,                 
+                    marginBottom: 100,                  
+                    spacingBottom: 50,
+                    spacingLeft: 10,
+                    marginRight: 40                    
+                },
+                rangeSelector: {
+                    enabled: false,
+                },
+
+                navigator:{
+                    enabled:true,
+                },          
+
+                title: {
+                    text: ds.label
+                },
+                xAxis: {  
+                    title: {
+                        enabled: false
+                    },
+                    type: 'datetime',
+
+                },
+                yAxis: {
+                    title: {
+                        text: 'Vísital'
+                    },
+                    max: 100,
+                    min: -100,
+                    plotLines: [{
+                        color: 'red',
+                        value: visitalavg, // Insert your average here
+                        width: '1',
+                        zIndex: 2 // To not get stuck below the regular plot lines
+                    }]   
+
+                },
+                tooltip: {
+                    formatter: function() {
+                        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
+                            sum = 0;
+
+                        $.each(this.points, function(i, point) {
+                            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,.0);
+                            sum += point.y;
+                                point.y;
+                            sum += point.y;
+                        });
+
+                        return s;
+                    },
+                    shared: true,
+
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'normal',
+                        lineColor: '#666666',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#666666'
+                        }
+                    },
+                    series: {
+                        showInNavigator: true
+                    }                    
+                },
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart6() {
+            POST("http://statbank.hagstova.fo/api/v1/fo/H2/KB/KB06/kb_tansam.px", {
+                 "query": [],
+              "response": {
+                "format": "json-stat"
+              }
+            }, buildChart6);
+        }
+
+
+
+
+
+
+        //Chart 7 specific functions
+        function buildChart7(jsonStatData) {
+
+            //Extrat Data From JSON Stat
+            ds = JSONstat(jsonStatData).Dataset(0);
+            t = ds.Dimension("time").length - 1;
+            year = ds.Dimension("time").id[t];
+
+            //Format Data
+
+			var fo = ds.Data({"reporting country": "FO", "employment status":"LF", "sex":"TOT"}, false);
+			var fo_NLF = ds.Data({"reporting country": "FO", "employment status":"NLF", "sex":"TOT"}, false);
+
+			var dk = ds.Data({"reporting country": "DK", "employment status":"LF", "sex":"TOT"}, false);
+			var dk_NLF = ds.Data({"reporting country": "DK", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var is = ds.Data({"reporting country": "IS", "employment status":"LF", "sex":"TOT"}, false);
+			var is_NLF = ds.Data({"reporting country": "IS", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var gl = ds.Data({"reporting country": "GL", "employment status":"LF", "sex":"TOT"}, false);
+			var gl_NLF = ds.Data({"reporting country": "GL", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var fi = ds.Data({"reporting country": "FI", "employment status":"LF", "sex":"TOT"}, false);
+			var fi_NLF = ds.Data({"reporting country": "FI", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var ax = ds.Data({"reporting country": "AX", "employment status":"LF", "sex":"TOT"}, false);
+			var ax_NLF = ds.Data({"reporting country": "AX", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var no = ds.Data({"reporting country": "NO", "employment status":"LF", "sex":"TOT"}, false);
+			var no_NLF = ds.Data({"reporting country": "NO", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var se = ds.Data({"reporting country": "SE", "employment status":"LF", "sex":"TOT"}, false);
+			var se_NLF = ds.Data({"reporting country": "SE", "employment status":"NLF", "sex":"TOT"}, false);	
+
+
+			var eu28 = ds.Data({"reporting country": "EU28", "employment status":"LF", "sex":"TOT"}, false);
+			var eu28_NLF = ds.Data({"reporting country": "EU28", "employment status":"NLF", "sex":"TOT"}, false);	
+
+			var year = ds.Dimension("time", false);
+			
+			var fLen = year.length;
+
+			var fodata = [];
+			for (i = 0; i < fLen; i++) {
+			  fodata.push([Date.parse(year[i]), fo[i]/(fo_NLF[i]+fo[i])*100]);
+
+			}
+
+
+			var dkdata = [];
+			for (i = 0; i < fLen; i++) {
+			  dkdata.push([Date.parse(year[i]), dk[i]/(dk_NLF[i]+dk[i])*100]);
+
+			}
+			
+			var isdata = [];
+			for (i = 0; i < fLen; i++) {
+			  isdata.push([Date.parse(year[i]), is[i]/(is_NLF[i]+is[i])*100]);
+
+			}
+
+			var gldata = [];
+			for (i = 0; i < fLen; i++) {
+			  gldata.push([Date.parse(year[i]), gl[i]/(gl_NLF[i]+gl[i])*100]);
+
+			}
+
+			var fidata = [];
+			for (i = 0; i < fLen; i++) {
+			  fidata.push([Date.parse(year[i]), fi[i]/(fi_NLF[i]+fi[i])*100]);
+
+			}
+
+
+			var axdata = [];
+			for (i = 0; i < fLen; i++) {
+			  axdata.push([Date.parse(year[i]), ax[i]/(ax_NLF[i]+ax[i])*100]);
+
+			}
+
+			var nodata = [];
+			for (i = 0; i < fLen; i++) {
+			  nodata.push([Date.parse(year[i]), no[i]/(no_NLF[i]+no[i])*100]);
+
+			}
+
+			var sedata = [];
+			for (i = 0; i < fLen; i++) {
+			  sedata.push([Date.parse(year[i]), se[i]/(se_NLF[i]+se[i])*100]);
+
+			}
+
+			var eu28data = [];
+			for (i = 0; i < fLen; i++) {
+			  eu28data.push([Date.parse(year[i]), eu28[i]/(eu28_NLF[i]+eu28[i])*100]);
+
+			}			
+
+
+            //Build Series
+            var createdSeries = [
+		        {
+		            name: 'Føroyar',           
+		            data: fodata,          
+		            tooltip: {
+		                valueDecimals: 0
+		            },
+                    color: '#2980b9'		            
+		        },
+                {
+                    name: 'Ísland',           
+                    data: isdata,          
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    color: 'rgba(41,128,185, 0.3)'
+
+                },
+                {
+                    name: 'Grønland',           
+                    data: gldata,          
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    color: 'rgba(231,76,60,0.3)'                   
+                },
+                {
+                    name: 'Áland',           
+                    data: axdata,          
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    color: 'rgba(211,84,0,0.3)'                   
+                },		        
+		        {
+		            name: 'Danmark',           
+		            data: dkdata,          
+		            tooltip: {
+		                valueDecimals: 0
+		            },
+                    color: 'rgba(192,57,43,0.3)'		            
+		        },
+                {
+                    name: 'Noreg',           
+                    data: nodata,          
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    color: 'rgba(44,62,80,0.3)'                   
+                },
+                {
+                    name: 'Svøríki',           
+                    data: sedata,          
+                    tooltip: {
+                        valueDecimals: 0
+                    },
+                    color: 'rgba(243,156,18,0.3)'                   
+                },                                
+		        {
+		            name: 'Finnland',           
+		            data: fidata,          
+		            tooltip: {
+		                valueDecimals: 0
+		            },
+                    color: 'rgba(41,128,185,0.3)'		            
+		        },
+
+
+		        {
+		            name: 'ES (28 lond)',           
+		            data: eu28data,          
+		            tooltip: {
+		                valueDecimals: 0
+
+		            },
+                    color: 'rgba(0,0,255, 0.3)'            
+		        }
+
+
+		        ];
+
+            //Build Title
+            var title = ds.label;
+
+            //Build subtitle
+            var subtitle = ds.source;
+
+            //Build Tooltip
+            var tooltipFunction = function() {
+                var s = '<b>' + Highcharts.dateFormat('%Y', this.x) + '</b>';
+                var sum = 0;
+                $.each(this.points,
+                    function(i, point) {
+                        s += '<br/>' + point.series.name + ': ' + Highcharts.numberFormat(point.y, .0) + ' (' + Highcharts.numberFormat(this.percentage, 1) + ' %)';
+                        sum += point.y;
+                    });
+
+                return s;
+            }
+
+            //Build Chart
+            $('#chart7').highcharts({
+                credits: {
+		            text: 'Hagstova Føroya',
+		            href: 'http://www.hagstova.fo'            
+                },
+                chart: {
+		            borderColor: '#bdc3c7',
+		            borderWidth: 1,
+			        marginTop: 80,
+			        spacingTop: 40,			        
+			        marginBottom: 100,			        
+			        spacingBottom: 20,
+			        spacingLeft: 10,
+			        marginRight: 40  
+                },
+                rangeSelector: {
+                    enabled: false,
+                },
+
+                navigator:{
+                    enabled:true,
+                },          
+
+                title: {
+                    text: 'Føroyska arbeiðsfjøldin samanborin við onnur lond'
+                },
+                xAxis: {  
+                    title: {
+                        enabled: false
+                    },
+                    type: 'datetime',
+                    min : Date.UTC(1995, 0, 1)                    
+                },
+                yAxis: {
+                    title: {
+                        text: 'Fólk'
+                    },
+                    max: 100
+
+                },
+                tooltip: {
+				    formatter: function() {
+				        var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>',
+				            sum = 0;
+
+				        $.each(this.points, function(i, point) {
+				            s += '<br/>'+ point.series.name +': '+ Highcharts.numberFormat(point.y,1)+ '%';
+				            sum += point.y;
+
+				            
+				        });
+
+                        return s;
+                    },
+                    shared: true,
+
+                },
+                plotOptions: {
+                    series: {
+                        marker: {
+                            enabled: false
+                        }
+                    },                    
+                    area: {
+                        stacking: 'normal',
+                        lineColor: '#666666',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#666666'
+                        }
+                    }
+                },
+                series: createdSeries
+            });
+        }
+
+        function loadDataAndBuildChart7() {
+            POST("http://91.208.143.100/pxweb/norden/api/v1/en/Nordic Statistics/Labour market/Unemployment/WORK02.px", {
+                 "query": [
+		    {
+		      "code": "reporting country",
+		      "selection": {
+		        "filter": "item",
+		        "values": [
+		          "DK",
+		          "FO",
+		          "GL",
+		          "FI",
+		          "AX",
+		          "IS",
+		          "NO",
+		          "SE",
+		          "EU28"
+		        ]
+		      }
+		    },
+		    {
+		      "code": "age",
+		      "selection": {
+		        "filter": "item",
+		        "values": [
+		          "TOT1564Y"
+		        ]
+		      }
+		    },
+		    {
+		      "code": "employment status",
+		      "selection": {
+		        "filter": "item",
+		        "values": [
+		          "NLF",
+		          "LF"
+		        ]
+		      }
+		    },
+		    {
+		      "code": "sex",
+		      "selection": {
+		        "filter": "item",
+		        "values": [
+		          "TOT"
+		        ]
+		      }
+		    }
+		  ],
+		  "response": {
+		    "format": "json-stat"
+		  }
+            }, buildChart7);
+        }        
+
+
+        //HELPER FUNCTION
+        function POST(url, query, main) {
+            fetch(url, { method: "post", body: JSON.stringify(query) })
+              .then(function (resp) {
+                  resp.json().then(main);
+              })
+            ;
+        }
+		
+        
+
+    </script>
+
+
+    <!-- Menu Help Text
+    ============================================= -->
+
+
+
+
+
+
+	<!-- Document Wrapper
+	============================================= -->
+	<div id="wrapper" class="clearfix">
+
+
+		<!-- Header
+		============================================= -->
+		<header id="header">
+
+			<div id="header-wrap">
+
+	
+
+				<div class="container clearfix">
+
+					<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+
+					<!-- Logo
+					============================================= -->
+					<div id="logo">
+						<a href="index.html" class="standard-logo" data-dark-logo="images/logo-dark.png"><img src="images/logo.png" alt="Canvas Logo"></a>
+						<a href="index.html" class="retina-logo" data-dark-logo="images/logo-dark@2x.png"><img src="images/logo@2x.png" alt="Canvas Logo"></a>
+					</div><!-- #logo end -->
+
+					<!-- Primary Navigation
+					============================================= -->
+					<nav id="primary-menu" class="style-2 with-arrows">
+
+						<ul>
+							
+							<li class="mega-menu"><a href="#"><div>Íbúgvar</div></a>
+								<div class="mega-menu-content style-2 clearfix">
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Fólkatal</div></a>
+											<ul>
+												<li><a href="folkatal.html"><div id="folkatal">Fólkatal</div></a></li>
+												<li><a href="blog-left-sidebar.html"><div id="forsyrgjarabyrda">Forsyrgjarabyrða</div></a></li>
+												<li><a href="blog-both-sidebar.html"><div>Fólkaframrokning</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Fólkaflyting</div></a>
+											<ul>
+												<li><a href="blog-timeline-right-sidebar.html"><div>Flyting innanlands</div></a></li>
+												<li><a href="blog-timeline-left-sidebar.html"><div>Flyting uttanlands</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Fødd og deyð</div></a>
+											<ul>
+												<li><a href="blog-masonry.html"><div>Fødd og deyð</div></a></li>
+												<li><a href="blog-masonry-3.html"><div>Fødd</div></a></li>
+												<li><a href="blog-masonry-2.html"><div>Deyð</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Lívsaldur</div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Lívsaldur</div></a></li>
+												<li><a href="blog-grid-3.html"><div>Deyðaorsøkir</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Borgarastøður</div></a>
+											<ul>
+												<li><a href="blog-small-left-sidebar.html"><div>Familjur</div></a></li>
+												<li><a href="blog-small.html"><div>Hjúnaløg</div></a></li>
+												<li><a href="blog-small-both-sidebar.html"><div>Skilnaðir</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Fólkanøvn</div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Dreingjanøvn</div></a></li>
+												<li><a href="blog-masonry.html"><div>Gentunøvn</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Fólkateljing</div></a>
+											<ul>
+												<li><a href="blog-single.html"><div>Manntal 2011</div></a></li>
+											</ul>
+										</li>
+									</ul>
+								</div>
+                                <div id="helptext" class="mega-menu-content row style-2"></div>                                
+							</li>
+							<li class="mega-menu"><a href="#"><div>Livikor</div></a>
+								<div class="mega-menu-content style-2 clearfix">
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Arbeiðsmarknaðr</div></a>
+											<ul>
+												<li><a href="index.html"><div>Arbeiðsfjøld</div></a></li>
+												<li><a href="blog-left-sidebar.html"><div>Arbeiðsvirkin</div></a></li>
+												<li><a href="blog-both-sidebar.html"><div>Arbeðsleys</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Heilsa</div></a>
+											<ul>
+												<li><a href="blog-timeline-right-sidebar.html"><div>Sjúkrahúsverk</div></a></li>
+												<li><a href="blog-timeline-left-sidebar.html"><div>Kommunulæknar</div></a></li>												
+												<li><a href="blog-timeline-left-sidebar.html"><div>Rúsdrekkanýtsla</div></a></li>
+												<li><a href="blog-timeline-left-sidebar.html"><div>Fosturtøkur</div></a></li>
+
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Mentan</div></a>
+											<ul>
+												<li><a href="blog-masonry.html"><div>Mentanarstuðul</div></a></li>
+												<li><a href="blog-masonry-3.html"><div>Søvn</div></a></li>
+												<li><a href="blog-masonry-2.html"><div>Filmir, bøkur og miðlar</div></a></li>
+												<li><a href="blog-masonry-2.html"><div>Kirkjur</div></a></li>												
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Undirvísing</div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Fólkaskúli</div></a></li>
+												<li><a href="blog-grid-3.html"><div>Miðnámsskúli</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Val</div></a>
+											<ul>
+												<li><a href="blog-small-left-sidebar.html"><div>Løgtingsval</div></a></li>
+												<li><a href="blog-small.html"><div>Kommunuval</div></a></li>
+												<li><a href="blog-small-both-sidebar.html"><div>Fólkatingsval</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Lóg og rættur</div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Lógarbrot</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Frítíðarlív</div></a>
+											<ul>
+												<li><a href="blog-single.html"><div>Ítróttarfeløg</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Almannamál</div></a>
+											<ul>
+												<li><a href="blog-single.html"><div>Almannaveitingar</div></a></li>											
+												<li><a href="blog-single.html"><div>Dagpeningur</div></a></li>
+											</ul>
+										</li>
+									</ul>									
+								</div>
+							</li>
+							<li class="mega-menu"><a href="#"><div>Vinna</div></a>
+								<div class="mega-menu-content style-2 clearfix">
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Vinnulív</div></a>
+											<ul>
+												<li><a href="blog.html"><div>Vísital</div></a></li>
+												<li><a href="blog-left-sidebar.html"><div>Arbeiðsfjøld</div></a></li>
+												<li><a href="blog-both-sidebar.html"><div>Arbeiðsvirkin</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Alivinna</div></a>
+											<ul>
+												<li><a href="blog-timeline-right-sidebar.html"><div>Vísital</div></a></li>
+												<li><a href="blog-timeline-left-sidebar.html"><div>Lønargjaldingar</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Fiskivinna</div></a>
+											<ul>
+												<li><a href="blog-masonry.html"><div>Vísital</div></a></li>
+												<li><a href="blog-masonry-3.html"><div>Lønargjaldingar</div></a></li>
+												<li><a href="blog-masonry-2.html"><div>Arbeiðsvirkin</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Handilsvinna</div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Vísital</div></a></li>
+												<li><a href="blog-grid-3.html"><div>Lønargjaldingar</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Ferðavinna</div></a>
+											<ul>
+												<li><a href="blog-small-left-sidebar.html"><div>Vísital</div></a></li>
+												<li><a href="blog-small.html"><div>Lønargjaldingar</div></a></li>
+												<li><a href="blog-small-both-sidebar.html"><div>Arbeiðsvirkin</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Byggivinna</div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Vísital</div></a></li>
+												<li><a href="blog-masonry.html"><div>Lønargjaldingar</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Bankavinna</div></a>
+											<ul>
+												<li><a href="blog-single.html"><div>Vísital</div></a></li>
+												<li><a href="blog-single.html"><div>Lønargjaldingar</div></a></li>												
+											</ul>
+										</li>
+									</ul>
+								</div>
+							</li>
+                            <li class="mega-menu"><a href="#"><div>Búskapur</div></a>
+                                
+                                <div class="mega-menu-content style-2 clearfix">
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Land</div></a>
+                                            <ul>
+                                                <li><a href="blog.html"><div>Tinglýsingar</div></a></li>
+                                                <li><a href="blog-left-sidebar.html"><div>Matriklar</div></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="mega-menu-title"><a href="#"><div>Veðrið</div></a>
+                                            <ul>
+                                                <li><a href="blog-timeline-right-sidebar.html"><div>Temperaturur</div></a></li>
+                                                <li><a href="blog-timeline-left-sidebar.html"><div>Vindur</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Samferðsla</div></a>
+                                            <ul>
+                                                <li><a href="blog-masonry.html"><div>Tunlar</div></a></li>
+                                                <li><a href="blog-masonry-3.html"><div>Vegir</div></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="mega-menu-title"><a href="#"><div>Orka</div></a>
+                                            <ul>
+                                                <li><a href="blog-grid.html"><div>Streymur</div></a></li>
+                                                <li><a href="blog-grid-3.html"><div>Útlát</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Náttúrutilfeingi</div></a>
+                                            <ul>
+                                                <li><a href="blog-small-left-sidebar.html"><div>Olja</div></a></li>
+                                                <li><a href="blog-small.html"><div>Grind</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Dálking</div></a>
+                                            <ul>
+                                                <li><a href="blog-single.html"><div>Fuglur</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <li class="mega-menu"><a href="#"><div>Umhvørvi</div></a>
+                                
+                                <div class="mega-menu-content style-2 clearfix">
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Land</div></a>
+                                            <ul>
+                                                <li><a href="blog.html"><div>Tinglýsingar</div></a></li>
+                                                <li><a href="blog-left-sidebar.html"><div>Matriklar</div></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="mega-menu-title"><a href="#"><div>Veðrið</div></a>
+                                            <ul>
+                                                <li><a href="blog-timeline-right-sidebar.html"><div>Temperaturur</div></a></li>
+                                                <li><a href="blog-timeline-left-sidebar.html"><div>Vindur</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Samferðsla</div></a>
+                                            <ul>
+                                                <li><a href="blog-masonry.html"><div>Tunlar</div></a></li>
+                                                <li><a href="blog-masonry-3.html"><div>Vegir</div></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="mega-menu-title"><a href="#"><div>Orka</div></a>
+                                            <ul>
+                                                <li><a href="blog-grid.html"><div>Streymur</div></a></li>
+                                                <li><a href="blog-grid-3.html"><div>Útlát</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Náttúrutilfeingi</div></a>
+                                            <ul>
+                                                <li><a href="blog-small-left-sidebar.html"><div>Olja</div></a></li>
+                                                <li><a href="blog-small.html"><div>Grind</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <ul class="mega-menu-column col-md-3">
+                                        <li class="mega-menu-title"><a href="#"><div>Dálking</div></a>
+                                            <ul>
+                                                <li><a href="blog-single.html"><div>Fuglur</div></a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+							
+							<li class="mega-menu"><a href="#"><div><i class="icon-map-marker"></i>Landaøki</div></a>
+								<div class="mega-menu-content style-2 clearfix">
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Suðurstreymoy <i class="icon-chevron-right"></i></div></a>
+											<ul>
+												<li><a href="blog.html"><div>Tórshavn</div></a></li>
+												<li><a href="blog-left-sidebar.html"><div>Velbastaður</div></a></li>
+												<li><a href="blog-both-sidebar.html"><div>Kollafjørður</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Norðurstreymoy <i class="icon-chevron-right"></i></div></a>
+											<ul>
+												<li><a href="blog-timeline-right-sidebar.html"><div>Kvívík</div></a></li>
+												<li><a href="blog-timeline-left-sidebar.html"><div>Vestmanna</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Norðoyggjar <i class="icon-chevron-right"></i></div></a>
+											<ul>
+												<li><a href="blog-masonry.html"><div>Klaksvík</div></a></li>
+												<li><a href="blog-masonry-3.html"><div>Viðareiði</div></a></li>
+												<li><a href="blog-masonry-2.html"><div>Kunoy</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Eysturoy <i class="icon-chevron-right"></i></div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Runavík</div></a></li>
+												<li><a href="blog-grid-3.html"><div>Gøta</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Vágar <i class="icon-chevron-right"></i></div></a>
+											<ul>
+												<li><a href="blog-small-left-sidebar.html"><div>Sandavágur</div></a></li>
+												<li><a href="blog-small.html"><div>Miðvágur</div></a></li>
+												<li><a href="blog-small-both-sidebar.html"><div>Sørvágur</div></a></li>
+											</ul>
+										</li>
+										<li class="mega-menu-title"><a href="#"><div>Sandoy <i class="icon-chevron-right"></i></div></a>
+											<ul>
+												<li><a href="blog-grid.html"><div>Skopun</div></a></li>
+												<li><a href="blog-masonry.html"><div>Sandur</div></a></li>
+											</ul>
+										</li>
+									</ul>
+									<ul class="mega-menu-column col-md-3">
+										<li class="mega-menu-title"><a href="#"><div>Suðuroy <i class="icon-chevron-right"></i>	</div></a>
+											<ul>
+												<li><a href="blog-single.html"><div>Tvøroyri</div></a></li>
+											</ul>
+										</li>
+									</ul>
+								</div>
+							</li>
+						</ul>
+
+						<!-- Top Cart
+						============================================= -->
+						<div id="top-cart">
+							<a href="#" id="top-cart-trigger"><i class="icon-bar-chart"></i></a>
+							<div class="top-cart-content">
+								<div class="top-cart-title">
+									<h4>Shopping Cart</h4>
+								</div>
+								<div class="top-cart-items">
+									<div class="top-cart-item clearfix">
+										<div class="top-cart-item-image">
+											<a href="#"><img src="images/shop/small/1.jpg" alt="Blue Round-Neck Tshirt" /></a>
+										</div>
+										<div class="top-cart-item-desc">
+											<a href="#">Blue Round-Neck Tshirt</a>
+											<span class="top-cart-item-price">$19.99</span>
+											<span class="top-cart-item-quantity">x 2</span>
+										</div>
+									</div>
+									<div class="top-cart-item clearfix">
+										<div class="top-cart-item-image">
+											<a href="#"><img src="images/shop/small/6.jpg" alt="Light Blue Denim Dress" /></a>
+										</div>
+										<div class="top-cart-item-desc">
+											<a href="#">Light Blue Denim Dress</a>
+											<span class="top-cart-item-price">$24.99</span>
+											<span class="top-cart-item-quantity">x 3</span>
+										</div>
+									</div>
+								</div>
+								<div class="top-cart-action clearfix">
+									<span class="fleft top-checkout-price">$114.95</span>
+									<button class="button button-3d button-small nomargin fright">View Cart</button>
+								</div>
+							</div>
+						</div><!-- #top-cart end -->
+
+						<!-- Top Search
+						============================================= -->
+						<div id="top-search">
+							<a href="#" id="top-search-trigger"><i class="icon-search3"></i><i class="icon-line-cross"></i></a>
+							<form action="search.html" method="get">
+								<input type="text" name="q" class="form-control" value="" placeholder="Type &amp; Hit Enter..">
+							</form>
+						</div><!-- #top-search end -->
+
+					</nav><!-- #primary-menu end -->
+
+				</div>
+
+			</div>
+
+		</header><!-- #header end -->
+
+
+
+		<section id="page-title" class="page-title-parallax page-title-dark" style="background-image: url('images/slider/full/3.jpg');"
+			data-stellar-background-ratio="0.3">
+
+			<div class="container clearfix">
+				<h1>Fólkaframrokning</h1>
+				<span>Fólkatalið framroknað við støði í søguligu fólkagongdini. </span>
+				<ol class="breadcrumb">
+					<li><a href="#">Hagstova</a></li>
+					<li><a href="#">Búskapur</a></li>
+					<li><a href="#">Konjunkturbarometrið</a></li>
+					<li class="active">Vísitalið</li>				
+				</ol>
+			</div>
+
+		</section>
+
+
+<!-- Content
+		============================================= -->
+		<section id="content">
+
+			<div class="content-wrap nopadding">
+
+                <div class="section nomargin">
+
+    				<div class="container clearfix">
+
+                            <div class="row">
+
+                                <div class="postcontent row clearfix">
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h1>Fólkaframrokning</h1>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h2>Íbúgvar</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar.</p>
+                                            <div id="chart1" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                            
+                                        </div>
+                                    </div>
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h3>Íbúgvar býtt á kyn</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            <div id="chart2" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                            
+                                        </div>
+                                    </div>
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                            <h3>Íbúgvar býtt á aldursbólkar</h3>
+                                            <p>Tað samanvigaða vísitalið er eitt roknað tal við støði í vektaðum vísitølum frá spurnarkanningum fyri fýra vinnubólkar og spurnarkanning fyri brúkarar. Vísitølini fyri einstøku kanningarnar eru miðaltøl av nettotølum fyri útvaldar spurningar. T.d. er brúkaravísitalið eitt miðaltal av nettotølunum fyri 4 av 15 spurningum í brúkarakanningini. Samanvigaða vísitalið og einstøku vísitølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl fyri sama spurning.</p>
+                                            <div id="chart3" style="border-width: 1px; min-width: 310px; height: 600px; margin: 0 auto; padding-bottom: 50px"></div>  
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="bottommargin-sm">
+                                        <div class="white-section">
+                                        <h4>Tekstur</h4>
+                                        <p>Kanningin fevnir um atburð og væntanir hjá brúkarum og er grundað á 15 spurningar, ið verða settir 500-550 brúkarum 2 reisir árliga. Nettotølini, ið er vigað býtið av svarmøguleikunum (liggur millum pluss 100 og minus 100) fyri brúkarar, vísa metingar um fíggjarstøðu hjá einum sjálvum og búskaparstøðan í samfelagnum. Vísitalið er miðal av nettotølum fyri spurningarnar: 1) Fíggjarliga støðan hjá húsarhaldinum um eitt ár sammett við í dag (nettotal), 2) Búskaparstøðan í Føroyum um eitt ár sammett við í dag (nettotal), 3) Arbeiðsloysið um eitt ár sammett við í dag (nettotal) og 4) Væntan hjá húsarhaldinum at spara upp næsta árið (nettotal)</p>
+                                        <div id="chart2" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>      
+                                        <h4 class="topmargin">Vísital fyri tilfeingisvinnu</h3>
+                                        <p>Vísitalið fyri tilfeingisvinnu og annan ídnað vísa gongd, støðu og útlit grundað á spurnarblað, ið inniheldur 15 spurningar, ið verða settir 35-40 fyritøkum 2 reisir árliga. Spurningarnir snúgva seg m.a. um sjálvt virksemið, møguligar avmarkingar í virkseminum, væntaður tørvur eftir arbeiðsfólki, meting um møguligar prísbroytingar, bíleggingar í mun til vanligt støði, framleiðsluorku og gongdin á marknaðum úti og heima. Vísitalið, ið er miðal av nettotølunum, og einstøku nettotølini kunnu liggja frá pluss 100 til minus 100. Eitt einstakt tal hevur einans innihald um sammett verður við søgulig tøl.</p>
+                                        <div id="chart3" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>  
+                                        <h3 class="topmargin">Vísital fyri byggivinnuna</h3>
+                                        <p>Vísitølini vísa gongd, støðu og útlit grundað á spurnarblað, ið inniheldur 6 spurningar, ið verða settir 20-25 byggifyritøkum 2 reisir árliga. Spurningarnir snúgva seg um sjálvt virksemið, møguligar avmarkingar í virkseminum, væntaður tørvur eftir arbeiðsfólki, meting um møguligar prísbroytingar, bíleggingar í mun til vanligt støði og tryggjaðar byggiverkætlaninir gjørt upp í tal av mánaðum.</p>
+                                        <div id="chart4" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>
+                                        <h3 class="topmargin">Vísital fyri handilsvinnuna</h3>
+                                        <p>Vísitalið fyri handilsvinnuna vísa gongd, støðu og útlit grundað á spurnarblað, ið inniheldur 6 spurningar, ið verða settir 20-25 handilsfyritøkum 2 reisir árliga. Spurningarnir snúgva seg um sølu, vørugoymslu, vørukeyp og væntanir um tørv á arbeiðsfólki í mun til vanligt støði.</p>
+                                        <div id="chart5" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>
+                                        <h3 class="topmargin">Vísital fyri tænastuvinnuna</h3>
+                                        <p>Vísitalið og nettotølini fyri tænastuvinnuna vísa gongd, støðu og útlit grundað á spurnarblað, ið inniheldur 5 spurningar, ið verða settir 20-25 tænastufyritøkum 2 reisir árliga. Spurningarnir snúgva seg um gongd/umsetning og tørvur á arbeiðsmegi í farnar mánaðir umframt komandi.</p>
+                                        <div id="chart6" style="border-width: 1px; min-width: 310px; height: 400px; margin: 0 auto"></div>                  
+                                            
+                                        </div>
+                                    </div>
+
+
+
+
+
+
+                                </div>
+
+
+
+
+                                    <!-- Sidebar
+                                    ============================================= -->
+                                    <div class="sidebar nobottommargin col_last clearfix">
+                                        <div class="sidebar-widgets-wrap">
+
+                                            <div class="bottommargin-sm">
+                                                <div class="white-section">
+
+                                                    <div class="widget clearfix">
+
+                                                        <h4>Nýggjastu tíðindi</h4>
+                                                        <div id="post-list-footer">
+
+                                                            <div class="spost clearfix">
+                                                                <div class="entry-image">
+                                                                    <a href="#" class="nobg"><img src="images/magazine/small/1.jpg" alt=""></a>
+                                                                </div>
+                                                                <div class="entry-c">
+                                                                    <div class="entry-title">
+                                                                        <h4><a href="#">Lorem ipsum dolor sit amet, consectetur</a></h4>
+                                                                    </div>
+                                                                    <ul class="entry-meta">
+                                                                        <li>10. juli 2016</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="spost clearfix">
+                                                                <div class="entry-image">
+                                                                    <a href="#" class="nobg"><img src="images/magazine/small/2.jpg" alt=""></a>
+                                                                </div>
+                                                                <div class="entry-c">
+                                                                    <div class="entry-title">
+                                                                        <h4><a href="#">Elit Assumenda vel amet dolorum quasi</a></h4>
+                                                                    </div>
+                                                                    <ul class="entry-meta">
+                                                                        <li>10. juli 2016</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="spost clearfix">
+                                                                <div class="entry-image">
+                                                                    <a href="#" class="nobg"><img src="images/magazine/small/3.jpg" alt=""></a>
+                                                                </div>
+                                                                <div class="entry-c">
+                                                                    <div class="entry-title">
+                                                                        <h4><a href="#">Debitis nihil placeat, illum est nisi</a></h4>
+                                                                    </div>
+                                                                    <ul class="entry-meta">
+                                                                        <li>10. juli 2016</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="widget clearfix">
+
+                                                        <h4>Nýggjastu greinar</h4>
+                                                        <div id="post-list-footer">
+
+                                                            <div class="spost clearfix">
+                                                                <div class="entry-image">
+                                                                    <a href="#" class="nobg"><img src="images/magazine/small/1.jpg" alt=""></a>
+                                                                </div>
+                                                                <div class="entry-c">
+                                                                    <div class="entry-title">
+                                                                        <h4><a href="#">Lorem ipsum dolor sit amet, consectetur</a></h4>
+                                                                    </div>
+                                                                    <ul class="entry-meta">
+                                                                        <li>10. juli 2016</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="spost clearfix">
+                                                                <div class="entry-image">
+                                                                    <a href="#" class="nobg"><img src="images/magazine/small/2.jpg" alt=""></a>
+                                                                </div>
+                                                                <div class="entry-c">
+                                                                    <div class="entry-title">
+                                                                        <h4><a href="#">Elit Assumenda vel amet dolorum quasi</a></h4>
+                                                                    </div>
+                                                                    <ul class="entry-meta">
+                                                                        <li>10. juli 2016</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="spost clearfix">
+                                                                <div class="entry-image">
+                                                                    <a href="#" class="nobg"><img src="images/magazine/small/3.jpg" alt=""></a>
+                                                                </div>
+                                                                <div class="entry-c">
+                                                                    <div class="entry-title">
+                                                                        <h4><a href="#">Debitis nihil placeat, illum est nisi</a></h4>
+                                                                    </div>
+                                                                    <ul class="entry-meta">
+                                                                        <li>10. juli 2016</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>                          
+
+
+                                                    <div class="widget widget_links clearfix">
+
+                                                        <h4>Talvur</h4>
+                                                        <ul>
+                                                            <li><a href="#"><div>Høvuðstøl úr arbeiðsfjøldarkanning 15-74 ár (2005-2015)</div></a></li>
+                                                            <li><a href="#"><div>Arbeiðsfjøld og arbeiðsvirkin skift á kyn og aldur (2005-2015)</div></a></li>
+                                                            <li><a href="#"><div>Arbeiðsfjøld og arbeiðsvirkin skift á kyn og bústað (2005-2015)</div></a></li>
+                                                            <li><a href="#"><div>Arbeiðsvirkin skift á parttíð/fulltíð, kyn og aldur (2005-2013)</div></a></li>
+                                                            <li><a href="#"><div>Høvuðstøl (EUROSTAT sambærlig 15-64 ár) skift á kyn og aldur (2005-2015)</div></a></li>
+                                                        </ul>
+
+                                                    </div>
+
+
+                                                    <div class="widget widget_links clearfix">
+
+                                                        <h4>Framleiðsla</h4>
+                                                        <ul>
+                                                            <li><a href="#"><div>Hugtøk</div></a></li>
+                                                            <li><a href="#"><div>Variablar</div></a></li>
+                                                            <li><a href="#"><div>Framleiðsla</div></a></li>
+                                                            <li><a href="#"><div>Ábyrgd</div></a></li>
+
+                                                        </ul>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div><!-- .sidebar end -->
+
+
+                            </div>
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+			</div>
+
+		</div>
+
+	</section><!-- #content end -->
+<!-- Footer
+		============================================= -->
+		<footer id="footer" class="dark">
+
+			<!-- Copyrights
+			============================================= -->
+			<div id="copyrights">
+
+				<div class="container clearfix">
+
+					<div class="col_half">
+						<img src="images/footer-logo.png" alt="" class="footer-logo">
+
+						Copyrights &copy; 2016 All Rights Reserved by Hagstova Føroya
+					</div>
+
+					<div class="col_half col_last tright">
+						<div class="copyrights-menu copyright-links fright clearfix">
+							<a href="#">Hagstovan</a>/<a href="#">Livikor</a>/<a href="#">Arbeiðsmarknaður</a>/<a href="#">Arbeiðsfjøld</a>
+						</div>
+						<div class="fright clearfix">
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-facebook">
+								<i class="icon-facebook"></i>
+								<i class="icon-facebook"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-twitter">
+								<i class="icon-twitter"></i>
+								<i class="icon-twitter"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-gplus">
+								<i class="icon-gplus"></i>
+								<i class="icon-gplus"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-pinterest">
+								<i class="icon-pinterest"></i>
+								<i class="icon-pinterest"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-vimeo">
+								<i class="icon-vimeo"></i>
+								<i class="icon-vimeo"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-github">
+								<i class="icon-github"></i>
+								<i class="icon-github"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-yahoo">
+								<i class="icon-yahoo"></i>
+								<i class="icon-yahoo"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless nobottommargin si-linkedin">
+								<i class="icon-linkedin"></i>
+								<i class="icon-linkedin"></i>
+							</a>
+						</div>
+					</div>
+
+				</div>
+
+			</div><!-- #copyrights end -->
+
+		</footer><!-- #footer end -->
+
+			</div>
+
+
+	</div><!-- #wrapper end -->
+
+
+
+	<!-- Go To Top
+	============================================= -->
+	<div id="gotoTop" class="icon-angle-up"></div>
+
+	<!-- External JavaScripts
+	============================================= -->
+	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/plugins.js"></script>
+
+	<!-- Footer Scripts
+	============================================= -->
+	<script type="text/javascript" src="js/functions.js"></script>
+
+    <script src="lib/json-stat/json-stat.js"></script>
+    <script src="lib/json-stat/utils/json-stat.utils.js"></script>
+    <script src="lib/highstock-5.0.0/js/highstock.js"></script>
+    <script src="lib/highstock-5.0.0/js/highcharts-more.js"></script>    
+    <script src="lib/highstock-5.0.0/js/modules/exporting.js"></script>
+
+    <!--<script src="https://code.highcharts.com/maps/highmaps.js"></script>  -->
+    <script src="https://code.highcharts.com/maps/modules/map.js"></script>   
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+
+    <script src="js/Motion-Highcharts-Plugin-master/motion.js"></script>
+    
+
+<script>
+$(document).ready(function() {
+    //START LOADING AND BUILDING CHART 1
+    loadDataAndBuildChart1();
+    loadDataAndBuildChart2();
+    loadDataAndBuildChart3();   
+    loadDataAndBuildChart4();   
+    loadDataAndBuildChart5();                    
+    loadDataAndBuildChart6();
+    loadDataAndBuildChart7();  
+});
+</script>
+
+</body>
+</html>
