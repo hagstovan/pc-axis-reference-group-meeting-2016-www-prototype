@@ -89,10 +89,10 @@ $('html').mouseover(function() {
             t = ds.Dimension("month").length - 1;
             year = ds.Dimension("month").id[t];
 
-            
-
             //Format Data
             var visital = ds.Data({ "indicator": "0" }, false).filter(n => n);
+
+alert(ds.Data({ "indicator": "0"}, false))                
 
             var year = ds.Dimension("month", false);
             var fLen = year.length;
@@ -106,6 +106,8 @@ $('html').mouseover(function() {
                 visitaldata.push([Date.parse(year[i]), visital[i]]);
                 visitalsum += visital[i];
             }
+
+
      
             var visitalavg = visitalsum/(fLen-1);
 
